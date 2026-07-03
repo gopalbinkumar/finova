@@ -1,0 +1,57 @@
+import { BrowserRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AppRouter } from '@/routes'
+import { useEffect } from 'react'
+
+// Initialize theme before render
+function initTheme() {
+  const saved = localStorage.getItem('finova_theme') ?? 'system'
+  const root  = document.documentElement
+  if (saved === 'dark') {
+    root.classList.add('dark')
+  } else if (saved === 'light') {
+    root.classList.remove('dark')
+  } else {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    root.classList.toggle('dark', prefersDark)
+  }
+}
+initTheme()
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+})
+
+function App() {
+  // Keep theme in sync with system changes
+  useEffect(() => {
+    const mql     = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => {
+      const saved = localStorage.getItem('finova_theme') ?? 'system'
+      if (saved === 'system') {
+        document.documentElement.classList.toggle('dark', mql.matches)
+      }
+    }
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
+    </QueryClientProvider>
+  )
+}
+
+export default App
