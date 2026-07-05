@@ -2,10 +2,12 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppRouter } from '@/routes'
 import { useEffect } from 'react'
+import { useAuthStore } from '@/store/authStore'
+import { mockUser } from '@/data/mockData'
 
 // Initialize theme before render
 function initTheme() {
-  const saved = localStorage.getItem('finova_theme') ?? 'system'
+  const saved = localStorage.getItem('finova_theme') ?? 'dark'
   const root  = document.documentElement
   if (saved === 'dark') {
     root.classList.add('dark')
@@ -20,23 +22,27 @@ initTheme()
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30_000,
-      refetchOnWindowFocus: false,
-    },
-    mutations: {
-      retry: 0,
-    },
+    queries: { retry: 1, staleTime: 30_000, refetchOnWindowFocus: false },
+    mutations: { retry: 0 },
   },
 })
 
-function App() {
-  // Keep theme in sync with system changes
+// ─── Demo: auto-login with mock user ─────────────────────────────────────────
+function DemoAuthInit() {
+  const { isAuthenticated, setAuth } = useAuthStore()
   useEffect(() => {
-    const mql     = window.matchMedia('(prefers-color-scheme: dark)')
+    if (!isAuthenticated) {
+      setAuth(mockUser as any, 'demo-token-finova')
+    }
+  }, [])
+  return null
+}
+
+function App() {
+  useEffect(() => {
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = () => {
-      const saved = localStorage.getItem('finova_theme') ?? 'system'
+      const saved = localStorage.getItem('finova_theme') ?? 'dark'
       if (saved === 'system') {
         document.documentElement.classList.toggle('dark', mql.matches)
       }
@@ -48,6 +54,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <DemoAuthInit />
         <AppRouter />
       </BrowserRouter>
     </QueryClientProvider>
