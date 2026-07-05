@@ -96,7 +96,7 @@ export function ReportsPage() {
               <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
               <Tooltip formatter={(v: number) => fmt(v)} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="income"  name="Income"   fill="#08CB00" radius={[4,4,0,0]} />
+              <Bar dataKey="income"  name="Income"   fill="#2563EB" radius={[4,4,0,0]} />
               <Bar dataKey="expense" name="Expense"  fill="#EF4444" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -109,15 +109,15 @@ export function ReportsPage() {
             <AreaChart data={savingsData}>
               <defs>
                 <linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#08CB00" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#08CB00" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
               <Tooltip formatter={(v: number) => [fmt(v), 'Savings']} />
-              <Area type="monotone" dataKey="savings" stroke="#08CB00" strokeWidth={2.5} fill="url(#savingsGrad)" />
+              <Area type="monotone" dataKey="savings" stroke="#2563EB" strokeWidth={2.5} fill="url(#savingsGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

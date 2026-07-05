@@ -43,7 +43,7 @@ export function DashboardPage() {
     <AddTransactionModal open={showTxModal} onClose={() => setShowTxModal(false)} />
     <div className="space-y-6 animate-in">
       {/* Welcome banner */}
-      <div className="relative rounded-2xl overflow-hidden p-6 text-white" style={{ background: 'linear-gradient(135deg, #253900 0%, #08CB00 100%)' }}>
+      <div className="relative rounded-2xl overflow-hidden p-6 text-white" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #2563EB 100%)' }}>
         <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
           <svg viewBox="0 0 200 200" fill="none"><circle cx="150" cy="50" r="80" fill="white"/><circle cx="50" cy="150" r="60" fill="white"/></svg>
         </div>
@@ -76,7 +76,7 @@ export function DashboardPage() {
           subtitle="vs $5,500 last month"
           icon={<TrendingUp size={20} />}
           trend={{ value: 20.4, label: 'vs last month' }}
-          accentColor="#08CB00"
+          accentColor="#2563EB"
           className="animate-in"
         />
         <StatCard
@@ -118,7 +118,7 @@ export function DashboardPage() {
               <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v/1000}k`} />
               <Tooltip content={<CustomTooltip />} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="income"  name="Income"   fill="#08CB00" radius={[4,4,0,0]} />
+              <Bar dataKey="income"  name="Income"   fill="#2563EB" radius={[4,4,0,0]} />
               <Bar dataKey="expense" name="Expense"  fill="#EF4444" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -244,15 +244,15 @@ export function DashboardPage() {
           <AreaChart data={cashFlowData}>
             <defs>
               <linearGradient id="cashFlowGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#08CB00" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#08CB00" stopOpacity={0} />
+                <stop offset="5%"  stopColor="#2563EB" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
             <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `Jun ${v}`} />
             <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v/1000}k`} />
             <Tooltip formatter={(v: number) => [fmt(v), 'Balance']} />
-            <Area type="monotone" dataKey="balance" stroke="#08CB00" strokeWidth={2.5} fill="url(#cashFlowGrad)" dot={false} />
+            <Area type="monotone" dataKey="balance" stroke="#2563EB" strokeWidth={2.5} fill="url(#cashFlowGrad)" dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

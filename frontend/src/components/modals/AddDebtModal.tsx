@@ -59,7 +59,7 @@ export function AddDebtModal({ open, onClose, defaultType = 'debt' }: Props) {
       title={isDebt ? 'Record a Debt' : 'Record Receivable'}
       subtitle={isDebt ? 'Money you owe to someone' : 'Money owed to you'}
       icon={<CreditCard size={20} />}
-      iconColor={isDebt ? '#EF4444' : '#08CB00'}
+      iconColor={isDebt ? '#EF4444' : '#2563EB'}
       footer={
         done
           ? <p className="text-center text-sm font-semibold text-primary-500">✅ Record saved!</p>
@@ -173,7 +173,7 @@ export function AddDebtModal({ open, onClose, defaultType = 'debt' }: Props) {
                 className="h-full rounded-full"
                 style={{
                   width: `${paidPct}%`,
-                  background: isDebt ? '#EF4444' : '#08CB00',
+                  background: isDebt ? '#EF4444' : '#2563EB',
                 }}
               />
             </div>

@@ -21,9 +21,9 @@ const CURRENCY_OPTIONS = [
   { value: 'SGD', label: 'SGD — Singapore Dollar' },
 ]
 
-const COLOR_PRESETS = ['#08CB00','#3B82F6','#EF4444','#F59E0B','#8B5CF6','#EC4899','#14B8A6','#F97316','#64748B','#253900']
+const COLOR_PRESETS = ['#2563EB','#3B82F6','#EF4444','#F59E0B','#8B5CF6','#EC4899','#14B8A6','#F97316','#64748B','#0F172A']
 
-const INITIAL = { name: '', type: 'bank', currency: 'USD', balance: '', color: '#08CB00', notes: '' }
+const INITIAL = { name: '', type: 'bank', currency: 'USD', balance: '', color: '#2563EB', notes: '' }
 
 export function AddAccountModal({ open, onClose }: Props) {
   const [form, setForm] = useState(INITIAL)
@@ -60,7 +60,7 @@ export function AddAccountModal({ open, onClose }: Props) {
       title="Add New Account"
       subtitle="Connect a bank, cash, or e-wallet account"
       icon={<Wallet size={20} />}
-      iconColor="#08CB00"
+      iconColor="#2563EB"
       footer={
         done
           ? <p className="text-center text-sm font-semibold text-primary-500">✅ Account added successfully!</p>

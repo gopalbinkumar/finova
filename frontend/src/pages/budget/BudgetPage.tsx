@@ -190,7 +190,7 @@ export function BudgetPage() {
                   <svg className="w-28 h-28 -rotate-90" viewBox="0 0 36 36">
                     <circle cx="18" cy="18" r="14" fill="none" className="stroke-muted" strokeWidth="3" />
                     <circle
-                      cx="18" cy="18" r="14" fill="none" stroke="#08CB00" strokeWidth="3"
+                      cx="18" cy="18" r="14" fill="none" stroke="#2563EB" strokeWidth="3"
                       strokeDasharray={`${Math.max(0, 100 - (totalSpent / totalBudget) * 100) * 0.879} 100`}
                       strokeLinecap="round"
                     />

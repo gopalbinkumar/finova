@@ -30,7 +30,7 @@ export function AddTransactionModal({ open, onClose, defaultType = 'expense' }: 
     setErrors(e => ({ ...e, [k]: '' }))
   }
 
-  const typeColors = { income: '#08CB00', expense: '#EF4444', transfer: '#3B82F6' }
+  const typeColors = { income: '#2563EB', expense: '#EF4444', transfer: '#6366F1' }
   const typeColor = typeColors[form.type]
 
   const filteredCategories = mockCategories

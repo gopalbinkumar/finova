@@ -83,9 +83,9 @@ export function AppLayout() {
         {fabOpen && (
           <div className="flex flex-col items-end gap-2 animate-in">
             {[
-              { label: 'Income',   type: 'income'   as const, color: '#08CB00', icon: <TrendingUp size={16} /> },
+              { label: 'Income',   type: 'income'   as const, color: '#2563EB', icon: <TrendingUp size={16} /> },
               { label: 'Expense',  type: 'expense'  as const, color: '#EF4444', icon: <TrendingDown size={16} /> },
-              { label: 'Transfer', type: 'transfer' as const, color: '#3B82F6', icon: <ArrowLeftRight size={16} /> },
+              { label: 'Transfer', type: 'transfer' as const, color: '#6366F1', icon: <ArrowLeftRight size={16} /> },
             ].map(item => (
               <button
                 key={item.type}

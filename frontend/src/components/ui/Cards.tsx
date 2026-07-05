@@ -10,7 +10,7 @@ interface StatCardProps {
   className?: string
 }
 
-export function StatCard({ title, value, subtitle, icon, trend, accentColor = '#08CB00', className = '' }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon, trend, accentColor = '#2563EB', className = '' }: StatCardProps) {
   const trendPositive = (trend?.value ?? 0) >= 0
 
   return (
@@ -48,7 +48,7 @@ interface MiniStatProps {
   dot?: boolean
 }
 
-export function MiniStat({ label, value, color = '#08CB00', dot = false }: MiniStatProps) {
+export function MiniStat({ label, value, color = '#2563EB', dot = false }: MiniStatProps) {
   return (
     <div className="flex items-center justify-between py-2">
       <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ interface ProgressBarProps {
   className?: string
 }
 
-export function ProgressBar({ value, max = 100, color = '#08CB00', showLabel = true, height = 8, className = '' }: ProgressBarProps) {
+export function ProgressBar({ value, max = 100, color = '#2563EB', showLabel = true, height = 8, className = '' }: ProgressBarProps) {
   const pct = Math.min((value / max) * 100, 100)
   const overBudget = pct >= 100
   const warning = pct >= 80

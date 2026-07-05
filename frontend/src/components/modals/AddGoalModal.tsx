@@ -5,10 +5,10 @@ import { Modal, FormField, Input, ModalFooter } from '@/components/ui/Modal'
 interface Props { open: boolean; onClose: () => void }
 
 const ICON_OPTIONS = ['🛡️','💻','🌴','🏠','🚗','💍','✈️','🎓','🏖️','🎸','🎥','⛵','🏔️','🐶','💊','📱','🏋️','🌏']
-const COLOR_PRESETS = ['#08CB00','#3B82F6','#F59E0B','#8B5CF6','#EC4899','#EF4444','#14B8A6','#F97316']
+const COLOR_PRESETS = ['#2563EB','#3B82F6','#F59E0B','#8B5CF6','#EC4899','#EF4444','#14B8A6','#F97316']
 
 const INITIAL = {
-  name: '', icon: '🎯', color: '#08CB00',
+  name: '', icon: '🎯', color: '#2563EB',
   target: '', initial: '0', deadline: '',
   notes: '',
 }

@@ -4,29 +4,29 @@
 
 @layer base {
   :root {
-    --background: #EEEEEE;
-    --foreground: #000000;
+    --background: #F1F5F9;
+    --foreground: #0F172A;
     --card: #FFFFFF;
-    --card-foreground: #000000;
-    --border: #D4D4D4;
-    --muted: #F5F5F5;
-    --muted-foreground: #6B7280;
-    --accent: #08CB00;
+    --card-foreground: #0F172A;
+    --border: #CBD5E1;
+    --muted: #F8FAFC;
+    --muted-foreground: #64748B;
+    --accent: #2563EB;
     --destructive: #EF4444;
-    --ring: #08CB00;
+    --ring: #2563EB;
   }
 
   .dark {
-    --background: #000000;
-    --foreground: #EEEEEE;
-    --card: #111111;
-    --card-foreground: #EEEEEE;
-    --border: #2A2A2A;
-    --muted: #1A1A1A;
-    --muted-foreground: #9CA3AF;
-    --accent: #08CB00;
+    --background: #020617;
+    --foreground: #F1F5F9;
+    --card: #0F172A;
+    --card-foreground: #F1F5F9;
+    --border: #1E293B;
+    --muted: #1E293B;
+    --muted-foreground: #94A3B8;
+    --accent: #3B82F6;
     --destructive: #EF4444;
-    --ring: #08CB00;
+    --ring: #3B82F6;
   }
 
   * {
@@ -56,7 +56,7 @@
     @apply bg-border rounded-full;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #08CB00;
+    background: #2563EB;
   }
 }
 
@@ -72,7 +72,7 @@
 
   /* Button variants */
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold px-6 py-2.5 rounded-lg
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-2.5 rounded-lg
            transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
            disabled:opacity-60 disabled:cursor-not-allowed;
   }
@@ -116,28 +116,28 @@
   /* Sidebar */
   .sidebar-item {
     @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
-           text-gray-300 hover:text-white hover:bg-white/10
+           text-slate-300 hover:text-white hover:bg-white/10
            transition-all duration-200 cursor-pointer;
   }
   .sidebar-item.active {
-    @apply text-white bg-primary-500/20 border border-primary-500/30;
+    @apply text-white bg-primary-600/20 border border-primary-500/30;
   }
 
   /* Auth card glow */
   .auth-glow {
-    box-shadow: 0 0 60px rgba(8, 203, 0, 0.08), 0 4px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 0 60px rgba(37, 99, 235, 0.12), 0 4px 24px rgba(0,0,0,0.12);
   }
 }
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, #08CB00 0%, #253900 100%);
+    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
   }
   .gradient-dark {
-    background: linear-gradient(180deg, #253900 0%, #000000 100%);
+    background: linear-gradient(180deg, #0F172A 0%, #020617 100%);
   }
   .text-gradient {
-    background: linear-gradient(135deg, #08CB00, #5eff58);
+    background: linear-gradient(135deg, #2563EB, #60A5FA);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -147,9 +147,6 @@
     -webkit-backdrop-filter: blur(16px);
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-  }
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   /* Finova table */
   .finova-table { @apply w-full text-sm; }

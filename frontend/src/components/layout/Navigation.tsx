@@ -45,7 +45,7 @@ export function Sidebar({ collapsed, onCollapse, onMobileClose, mobile = false }
         flex flex-col h-full transition-all duration-300
         ${collapsed && !mobile ? 'w-16' : 'w-64'}
       `}
-      style={{ background: 'linear-gradient(180deg, #253900 0%, #0f1800 100%)' }}
+      style={{ background: 'linear-gradient(180deg, #0F172A 0%, #020617 100%)' }}
     >
       {/* Header */}
       <div className={`flex items-center justify-between px-4 py-5 border-b border-white/10 flex-shrink-0`}>

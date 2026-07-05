@@ -27,7 +27,7 @@ export function Modal({
   title,
   subtitle,
   icon,
-  iconColor = '#08CB00',
+  iconColor = '#2563EB',
   children,
   maxWidth = 'md',
   footer,

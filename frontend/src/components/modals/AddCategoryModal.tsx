@@ -5,7 +5,7 @@ import { Modal, FormField, Input, ModalFooter } from '@/components/ui/Modal'
 interface Props { open: boolean; onClose: () => void; defaultType?: 'income' | 'expense' }
 
 const ICON_OPTIONS = ['🍔','🚗','🛍️','⚡','🏥','🎬','📚','🏠','✈️','💼','💻','📈','🎮','🎵','🏋️','🐾','🌿','☕','🎁','🔧','💊','🍕','🏖️','🚀']
-const COLOR_PRESETS = ['#08CB00','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#EF4444','#F97316','#14B8A6','#06B6D4','#6366F1','#64748B']
+const COLOR_PRESETS = ['#2563EB','#10B981','#3B82F6','#8B5CF6','#EC4899','#F59E0B','#EF4444','#F97316','#14B8A6','#06B6D4','#6366F1','#64748B']
 
 const INITIAL = { name: '', type: 'expense' as 'income' | 'expense', icon: '🍔', color: '#F59E0B' }
 

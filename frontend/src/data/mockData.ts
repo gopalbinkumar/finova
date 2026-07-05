@@ -16,8 +16,8 @@ export const mockUser = {
 
 // ─── Accounts ────────────────────────────────────────────────────────────────
 export const mockAccounts = [
-  { id: 1, name: 'Chase Checking',    type: 'bank',        balance: 12_450.75, color: '#08CB00', icon: '🏦', currency: 'USD' },
-  { id: 2, name: 'Savings Account',  type: 'bank',        balance: 35_200.00, color: '#253900', icon: '💰', currency: 'USD' },
+  { id: 1, name: 'Chase Checking',    type: 'bank',        balance: 12_450.75, color: '#2563EB', icon: '🏦', currency: 'USD' },
+  { id: 2, name: 'Savings Account',  type: 'bank',        balance: 35_200.00, color: '#0F172A', icon: '💰', currency: 'USD' },
   { id: 3, name: 'Cash Wallet',      type: 'cash',        balance: 280.50,    color: '#F59E0B', icon: '💵', currency: 'USD' },
   { id: 4, name: 'Visa Credit',      type: 'credit_card', balance: -2_150.30, color: '#EF4444', icon: '💳', currency: 'USD' },
   { id: 5, name: 'GoPay',            type: 'e_wallet',    balance: 450.00,    color: '#3B82F6', icon: '📱', currency: 'USD' },
@@ -28,7 +28,7 @@ export const totalBalance = mockAccounts.reduce((sum, a) => sum + a.balance, 0)
 
 // ─── Categories ──────────────────────────────────────────────────────────────
 export const mockCategories = [
-  { id: 1,  name: 'Salary',         type: 'income',  icon: '💼', color: '#08CB00' },
+  { id: 1,  name: 'Salary',         type: 'income',  icon: '💼', color: '#2563EB' },
   { id: 2,  name: 'Freelance',      type: 'income',  icon: '💻', color: '#10B981' },
   { id: 3,  name: 'Investment',     type: 'income',  icon: '📈', color: '#6366F1' },
   { id: 4,  name: 'Food & Dining',  type: 'expense', icon: '🍔', color: '#F59E0B' },
@@ -75,7 +75,7 @@ export const mockBudgets = [
 
 // ─── Financial Goals ─────────────────────────────────────────────────────────
 export const mockGoals = [
-  { id: 1, name: 'Emergency Fund',    icon: '🛡️', target: 20000, current: 14500, deadline: '2024-12-31', notes: '6 months of expenses',      color: '#08CB00' },
+  { id: 1, name: 'Emergency Fund',    icon: '🛡️', target: 20000, current: 14500, deadline: '2024-12-31', notes: '6 months of expenses',      color: '#2563EB' },
   { id: 2, name: 'MacBook Pro',       icon: '💻', target: 3500,  current: 2100,  deadline: '2024-09-30', notes: 'For work and side projects', color: '#3B82F6' },
   { id: 3, name: 'Vacation - Bali',   icon: '🌴', target: 5000,  current: 1800,  deadline: '2025-03-01', notes: '10 days trip',               color: '#F59E0B' },
   { id: 4, name: 'Down Payment',      icon: '🏠', target: 50000, current: 18900, deadline: '2026-06-30', notes: 'House down payment 20%',     color: '#8B5CF6' },

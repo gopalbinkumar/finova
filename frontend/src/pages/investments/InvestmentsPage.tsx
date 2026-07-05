@@ -69,8 +69,8 @@ export function InvestmentsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 stagger">
           {[
             { title: 'Invested', value: fmt(totalCost),  color: '#3B82F6' },
-            { title: 'Return',   value: fmt(totalGain),  color: totalGain >= 0 ? '#08CB00' : '#EF4444' },
-            { title: 'Return %', value: fmtPct(totalPct), color: totalPct >= 0 ? '#08CB00' : '#EF4444' },
+            { title: 'Return',   value: fmt(totalGain),  color: totalGain >= 0 ? '#2563EB' : '#EF4444' },
+            { title: 'Return %', value: fmtPct(totalPct), color: totalPct >= 0 ? '#2563EB' : '#EF4444' },
             { title: 'Assets',   value: `${mockInvestments.length}`, color: '#8B5CF6' },
           ].map(s => (
             <div key={s.title} className="finova-card text-center animate-in">
