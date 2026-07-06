@@ -2,11 +2,20 @@ import axios from 'axios'
 
 export const api = axios.create({
   baseURL: '/api',
+  withCredentials: true,
+  withXSRFToken: true,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 })
+
+export function initializeCsrf() {
+  return axios.get('/sanctum/csrf-cookie', {
+    withCredentials: true,
+    withXSRFToken: true,
+  })
+}
 
 export function mockResponse(data, message = 'OK') {
   return Promise.resolve({
@@ -25,5 +34,5 @@ export function getErrorMessage(error) {
   }
   if (error?.response?.data?.message) return error.response.data.message
   if (error instanceof Error) return error.message
-  return 'The demo action could not be completed.'
+  return 'Terjadi kesalahan. Silakan coba lagi.'
 }

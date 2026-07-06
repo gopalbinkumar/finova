@@ -11,7 +11,7 @@ export function useLogin() {
     return useMutation({
         mutationFn: (data) => authService.login(data),
         onSuccess: ({ data }) => {
-            setAuth(data.data.user, data.data.token);
+            setAuth(data.data.user);
             navigate('/dashboard');
         },
     });
@@ -22,7 +22,7 @@ export function useRegister() {
     return useMutation({
         mutationFn: (data) => authService.register(data),
         onSuccess: ({ data }) => {
-            setAuth(data.data.user, data.data.token);
+            setAuth(data.data.user);
             navigate('/dashboard');
         },
     });
@@ -44,7 +44,7 @@ export function useMe() {
     const { user, isAuthenticated } = useAuthStore();
     return useQuery({
         queryKey: AUTH_QUERY_KEY,
-        queryFn: () => authService.me().then((r) => r.data.data),
+        queryFn: () => authService.me().then((r) => r.data.data.user),
         enabled: isAuthenticated,
         initialData: user,
     });

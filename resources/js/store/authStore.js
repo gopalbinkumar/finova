@@ -1,25 +1,11 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-export const useAuthStore = create()(persist((set) => ({
-    user: null,
-    token: null,
-    isAuthenticated: false,
-    setAuth: (user, token) => {
-        localStorage.setItem('finova_token', token);
-        set({ user, token, isAuthenticated: true });
-    },
-    setUser: (user) => {
-        set({ user });
-    },
-    logout: () => {
-        localStorage.removeItem('finova_token');
-        set({ user: null, token: null, isAuthenticated: false });
-    },
-}), {
-    name: 'finova_auth',
-    partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-    }),
-}));
+import { create } from 'zustand'
+
+export const useAuthStore = create()((set) => ({
+  user: null,
+  isAuthenticated: false,
+  isInitialized: false,
+  setAuth: (user) => set({ user, isAuthenticated: true, isInitialized: true }),
+  setUser: (user) => set({ user }),
+  setGuest: () => set({ user: null, isAuthenticated: false, isInitialized: true }),
+  logout: () => set({ user: null, isAuthenticated: false, isInitialized: true }),
+}))

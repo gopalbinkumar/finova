@@ -19,13 +19,17 @@ import { NotificationsPage } from '@/pages/notifications/NotificationsPage';
 import { useAuthStore } from '@/store/authStore';
 // ─── Route Guards ─────────────────────────────────────────────────────────────
 function ProtectedRoute({ children }) {
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, isInitialized } = useAuthStore();
+    if (!isInitialized)
+        return <div className="min-h-screen bg-background"/>;
     if (!isAuthenticated)
         return <Navigate to="/login" replace/>;
     return <>{children}</>;
 }
 function GuestRoute({ children }) {
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, isInitialized } = useAuthStore();
+    if (!isInitialized)
+        return <div className="min-h-screen bg-background"/>;
     if (isAuthenticated)
         return <Navigate to="/dashboard" replace/>;
     return <>{children}</>;

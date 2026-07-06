@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Wallet, Tag, ArrowLeftRight, PieChart, Target, TrendingUp, CreditCard, BarChart2, Bell, Settings, LogOut, X, ChevronLeft, ChevronRight, Menu, } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
 import { useAuthStore } from '@/store/authStore';
+import { useLogout } from '@/hooks/useAuth';
 import { mockNotifications } from '@/data/mockData';
 const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -16,12 +17,11 @@ const navItems = [
     { to: '/notifications', icon: Bell, label: 'Notifications' },
 ];
 export function Sidebar({ collapsed, onCollapse, onMobileClose, mobile = false }) {
-    const { user, logout } = useAuthStore();
-    const navigate = useNavigate();
+    const { user } = useAuthStore();
+    const logout = useLogout();
     const unread = mockNotifications.filter(n => !n.read).length;
     const handleLogout = () => {
-        logout();
-        navigate('/login');
+        logout.mutate();
     };
     return (<aside className={`
         flex flex-col h-full transition-all duration-300

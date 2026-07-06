@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppRouter } from '@/routes';
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { mockUser } from '@/data/mockData';
+import { authService } from '@/services/authService';
 // Initialize theme before render
 function initTheme() {
     const saved = localStorage.getItem('finova_theme') ?? 'dark';
@@ -27,13 +27,19 @@ const queryClient = new QueryClient({
     },
 });
 // ─── Demo: auto-login with mock user ─────────────────────────────────────────
-function DemoAuthInit() {
-    const { isAuthenticated, setAuth } = useAuthStore();
+function AuthInit() {
+    const { setAuth, setGuest } = useAuthStore();
     useEffect(() => {
-        if (!isAuthenticated) {
-            setAuth(mockUser, 'demo-token-finova');
-        }
-    }, []);
+        let active = true;
+
+        authService.me()
+            .then(({ data }) => active && setAuth(data.data.user))
+            .catch(() => active && setGuest());
+
+        return () => {
+            active = false;
+        };
+    }, [setAuth, setGuest]);
     return null;
 }
 function App() {
@@ -50,7 +56,7 @@ function App() {
     }, []);
     return (<QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <DemoAuthInit />
+        <AuthInit />
         <AppRouter />
       </BrowserRouter>
     </QueryClientProvider>);

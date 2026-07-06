@@ -1,93 +1,52 @@
-import { mockUser } from '@/data/mockData'
-import { mockResponse } from '@/utils/api'
-
-const DEMO_DELAY = 250
-
-function wait() {
-  return new Promise((resolve) => window.setTimeout(resolve, DEMO_DELAY))
-}
-
-function currentStoredUser() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('finova_auth') ?? '{}')
-    return stored?.state?.user ?? mockUser
-  } catch {
-    return mockUser
-  }
-}
+import { api, initializeCsrf, mockResponse } from '@/utils/api'
 
 export const authService = {
   async register(data) {
-    await wait()
-    return mockResponse({
-      user: {
-        ...mockUser,
-        name: data.name,
-        email: data.email,
-        updated_at: new Date().toISOString(),
-      },
-      token: 'demo-token-finova',
-    }, 'Registered in demo mode')
+    await initializeCsrf()
+    return api.post('/auth/register', data)
   },
 
-  async login() {
-    await wait()
-    return mockResponse({
-      user: currentStoredUser(),
-      token: 'demo-token-finova',
-    }, 'Logged in demo mode')
+  async login(data) {
+    await initializeCsrf()
+    return api.post('/auth/login', data)
   },
 
   async logout() {
-    await wait()
-    return mockResponse(null, 'Logged out')
+    await initializeCsrf()
+    return api.post('/auth/logout')
   },
 
   async me() {
-    await wait()
-    return mockResponse(currentStoredUser())
+    return api.get('/auth/me')
   },
 
   async forgotPassword() {
-    await wait()
     return mockResponse(null, 'Password reset email queued in demo mode')
   },
 
   async resetPassword() {
-    await wait()
     return mockResponse(null, 'Password reset in demo mode')
   },
 
   async updateProfile(data) {
-    await wait()
-    return mockResponse({
-      ...currentStoredUser(),
-      ...data,
-      phone: data.phone ?? null,
-      updated_at: new Date().toISOString(),
-    }, 'Profile updated')
+    const current = await this.me()
+    return mockResponse({ ...current.data.data.user, ...data })
   },
 
   async changePassword() {
-    await wait()
-    return mockResponse(null, 'Password changed')
+    return mockResponse(null, 'Password changed in demo mode')
   },
 
   async uploadAvatar(file) {
-    await wait()
+    const current = await this.me()
     return mockResponse({
-      ...currentStoredUser(),
+      ...current.data.data.user,
       avatar_url: URL.createObjectURL(file),
-      updated_at: new Date().toISOString(),
-    }, 'Avatar updated')
+    })
   },
 
   async deleteAvatar() {
-    await wait()
-    return mockResponse({
-      ...currentStoredUser(),
-      avatar_url: null,
-      updated_at: new Date().toISOString(),
-    }, 'Avatar removed')
+    const current = await this.me()
+    return mockResponse({ ...current.data.data.user, avatar_url: null })
   },
 }
