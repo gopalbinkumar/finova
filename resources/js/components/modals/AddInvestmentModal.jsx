@@ -67,7 +67,7 @@ export function AddInvestmentModal({ open, onClose }) {
         </FormField>
 
         {/* Symbol + Name */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label="Ticker / Symbol" required error={errors.symbol}>
             <Input placeholder="e.g. AAPL" value={form.symbol} onChange={e => set('symbol', e.target.value.toUpperCase())} error={!!errors.symbol} className="uppercase font-mono font-bold" autoFocus/>
           </FormField>
@@ -77,7 +77,7 @@ export function AddInvestmentModal({ open, onClose }) {
         </div>
 
         {/* Qty + Buy Price + Current Price */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <FormField label="Quantity" required error={errors.qty}>
             <Input type="number" step="0.0001" min="0" placeholder="10" value={form.qty} onChange={e => set('qty', e.target.value)} error={!!errors.qty}/>
           </FormField>
@@ -100,7 +100,7 @@ export function AddInvestmentModal({ open, onClose }) {
         </FormField>
 
         {/* P&L Preview */}
-        {qty > 0 && buyPrice > 0 && (<div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-muted/40 border border-border">
+        {qty > 0 && buyPrice > 0 && (<div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-3 p-4 rounded-xl bg-muted/40 border border-border">
             <div className="text-center">
               <p className="text-xs text-muted-foreground mb-1">Total Cost</p>
               <p className="font-bold text-foreground">{fmt(totalCost)}</p>

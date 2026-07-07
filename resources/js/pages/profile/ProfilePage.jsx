@@ -6,6 +6,7 @@ import { User, Mail, Phone, Globe, Clock, Palette, Camera, Trash2, Eye, EyeOff, 
 import { useMe, useUpdateProfile, useChangePassword, useUploadAvatar, useDeleteAvatar, getErrorMessage, } from '@/hooks/useAuth';
 import { LoadingButton } from '@/components/common/LoadingButton';
 import { Spinner } from '@/components/common/LoadingButton';
+import { ConfirmDeleteModal } from '@/components/ui/RecordActions';
 // ─── Profile Schema ───────────────────────────────────────────────────────────
 const profileSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -38,6 +39,7 @@ function AvatarSection() {
     const deleteAvatar = useDeleteAvatar();
     const fileInputRef = useRef(null);
     const [avatarError, setAvatarError] = useState(null);
+    const [confirmRemove, setConfirmRemove] = useState(false);
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
         if (!file)
@@ -62,7 +64,9 @@ function AvatarSection() {
     const initials = user?.name
         ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
         : 'U';
-    return (<div className="flex flex-col sm:flex-row items-center gap-6">
+    return (<>
+    <ConfirmDeleteModal open={confirmRemove} onClose={() => setConfirmRemove(false)} itemName="your profile photo" itemType="photo" onConfirm={() => deleteAvatar.mutate()}/>
+    <div className="flex flex-col sm:flex-row items-center gap-6">
       {/* Avatar display */}
       <div className="relative group flex-shrink-0">
         <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary-500/30 bg-brand-dark flex items-center justify-center">
@@ -84,7 +88,7 @@ function AvatarSection() {
             <Camera size={14}/>
             Change Photo
           </button>
-          {user?.avatar_url && (<button type="button" onClick={() => deleteAvatar.mutate()} className="btn-danger text-sm px-4 py-1.5 flex items-center gap-1.5" disabled={deleteAvatar.isPending}>
+          {user?.avatar_url && (<button type="button" onClick={() => setConfirmRemove(true)} className="btn-danger text-sm px-4 py-1.5 flex items-center gap-1.5" disabled={deleteAvatar.isPending}>
               <Trash2 size={14}/>
               Remove
             </button>)}
@@ -92,7 +96,8 @@ function AvatarSection() {
         {avatarError && <p className="text-destructive text-xs mt-2">{avatarError}</p>}
         <p className="text-muted-foreground text-xs mt-2">JPG, PNG, WebP — max 2MB</p>
       </div>
-    </div>);
+    </div>
+    </>);
 }
 // ─── Profile Form ─────────────────────────────────────────────────────────────
 function ProfileForm() {

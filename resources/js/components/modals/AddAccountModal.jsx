@@ -1,104 +1,133 @@
-import { useState } from 'react';
-import { Wallet } from 'lucide-react';
-import { Modal, FormField, Input, Select, ModalFooter } from '@/components/ui/Modal';
+import { useEffect, useState } from 'react'
+import { Wallet } from 'lucide-react'
+import { FormField, Input, Modal, ModalFooter, Select } from '@/components/ui/Modal'
+
 const TYPE_OPTIONS = [
-    { value: 'bank', label: '🏦 Bank Account' },
-    { value: 'cash', label: '💵 Cash' },
-    { value: 'credit_card', label: '💳 Credit Card' },
-    { value: 'e_wallet', label: '📱 E-Wallet' },
-    { value: 'investment', label: '📈 Investment Account' },
-];
-const CURRENCY_OPTIONS = [
-    { value: 'USD', label: 'USD — US Dollar' },
-    { value: 'EUR', label: 'EUR — Euro' },
-    { value: 'GBP', label: 'GBP — British Pound' },
-    { value: 'IDR', label: 'IDR — Indonesian Rupiah' },
-    { value: 'JPY', label: 'JPY — Japanese Yen' },
-    { value: 'SGD', label: 'SGD — Singapore Dollar' },
-];
-const COLOR_PRESETS = ['#2563EB', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#64748B', '#0F172A'];
-const INITIAL = { name: '', type: 'bank', currency: 'USD', balance: '', color: '#2563EB', notes: '' };
-export function AddAccountModal({ open, onClose }) {
-    const [form, setForm] = useState(INITIAL);
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
-    const [done, setDone] = useState(false);
-    const set = (k, v) => {
-        setForm(f => ({ ...f, [k]: v }));
-        setErrors(e => ({ ...e, [k]: '' }));
-    };
-    const validate = () => {
-        const e = {};
-        if (!form.name.trim())
-            e.name = 'Account name is required';
-        if (form.balance === '')
-            e.balance = 'Opening balance is required';
-        return e;
-    };
-    const handleSubmit = async () => {
-        const e = validate();
-        if (Object.keys(e).length) {
-            setErrors(e);
-            return;
-        }
-        setLoading(true);
-        await new Promise(r => setTimeout(r, 900));
-        setLoading(false);
-        setDone(true);
-        setTimeout(() => { setDone(false); setForm(INITIAL); onClose(); }, 1200);
-    };
-    return (<Modal open={open} onClose={onClose} title="Add New Account" subtitle="Connect a bank, cash, or e-wallet account" icon={<Wallet size={20}/>} iconColor="#2563EB" footer={done
-            ? <p className="text-center text-sm font-semibold text-primary-500">✅ Account added successfully!</p>
-            : <ModalFooter onCancel={onClose} onSubmit={handleSubmit} submitLabel="Add Account" loading={loading}/>}>
+  { value: 'bank', label: '🏦 Bank Account' },
+  { value: 'cash', label: '💵 Cash' },
+  { value: 'credit_card', label: '💳 Credit Card' },
+  { value: 'e_wallet', label: '📱 E-Wallet' },
+  { value: 'investment', label: '📈 Investment Account' },
+]
+const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'IDR', 'JPY', 'SGD'].map((value) => ({ value, label: value }))
+const COLOR_PRESETS = ['#2563EB', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#64748B', '#0F172A']
+const INITIAL = { name: '', type: 'bank', currency: 'USD', balance: '', color: '#2563EB', notes: '' }
+
+export function AddAccountModal({ open, onClose, onCreate }) {
+  const [form, setForm] = useState(INITIAL)
+  const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    setForm(INITIAL)
+    setErrors({})
+    setDone(false)
+  }, [open])
+
+  const setField = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }))
+    setErrors((current) => ({ ...current, [key]: '' }))
+  }
+
+  const handleClose = () => {
+    if (!loading) onClose()
+  }
+
+  const handleSubmit = async () => {
+    const nextErrors = {}
+    if (!form.name.trim()) nextErrors.name = 'Account name is required'
+    if (form.balance === '' || Number.isNaN(Number(form.balance))) nextErrors.balance = 'Opening balance must be a number'
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors)
+      return
+    }
+
+    try {
+      setLoading(true)
+      setErrors({})
+      await onCreate({ ...form, name: form.name.trim(), balance: Number(form.balance), notes: form.notes.trim() || null })
+      setDone(true)
+      window.setTimeout(() => {
+        setDone(false)
+        onClose()
+      }, 600)
+    } catch (error) {
+      const validation = error?.response?.data?.errors ?? {}
+      setErrors({
+        name: validation.name?.[0] || error?.response?.data?.message || 'Failed to create account',
+        type: validation.type?.[0],
+        currency: validation.currency?.[0],
+        balance: validation.balance?.[0],
+        color: validation.color?.[0],
+        notes: validation.notes?.[0],
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Add New Account"
+      subtitle="Connect a bank, cash, or e-wallet account"
+      icon={<Wallet size={20} />}
+      iconColor="#2563EB"
+      footer={done
+        ? <p className="text-center text-sm font-semibold text-primary-500">✅ Account added successfully!</p>
+        : <ModalFooter onCancel={handleClose} onSubmit={handleSubmit} submitLabel="Add Account" loading={loading} />}
+    >
       <div className="space-y-4">
-        {/* Name */}
         <FormField label="Account Name" required error={errors.name}>
-          <Input placeholder="e.g. Chase Checking" value={form.name} onChange={e => set('name', e.target.value)} error={!!errors.name} autoFocus/>
+          <Input placeholder="e.g. BCA Savings" value={form.name} onChange={(event) => setField('name', event.target.value)} error={!!errors.name} disabled={loading} autoFocus />
         </FormField>
 
-        {/* Type + Currency row */}
         <div className="grid grid-cols-2 gap-4">
-          <FormField label="Account Type" required>
-            <Select value={form.type} onChange={e => set('type', e.target.value)} options={TYPE_OPTIONS}/>
+          <FormField label="Account Type" required error={errors.type}>
+            <Select value={form.type} onChange={(event) => setField('type', event.target.value)} options={TYPE_OPTIONS} disabled={loading} />
           </FormField>
-          <FormField label="Currency" required>
-            <Select value={form.currency} onChange={e => set('currency', e.target.value)} options={CURRENCY_OPTIONS}/>
+          <FormField label="Currency" required error={errors.currency}>
+            <Select value={form.currency} onChange={(event) => setField('currency', event.target.value)} options={CURRENCY_OPTIONS} disabled={loading} />
           </FormField>
         </div>
 
-        {/* Opening Balance */}
         <FormField label="Opening Balance" required error={errors.balance} hint="Use negative value for credit card debt">
-          <Input type="number" step="0.01" placeholder="0.00" value={form.balance} onChange={e => set('balance', e.target.value)} error={!!errors.balance} leftDecor="$"/>
+          <Input type="number" step="0.01" placeholder="0.00" value={form.balance} onChange={(event) => setField('balance', event.target.value)} error={!!errors.balance} disabled={loading} />
         </FormField>
 
-        {/* Color picker */}
-        <FormField label="Account Color">
+        <FormField label="Account Color" error={errors.color}>
           <div className="flex items-center gap-2 flex-wrap">
-            {COLOR_PRESETS.map(c => (<button key={c} type="button" onClick={() => set('color', c)} className="w-8 h-8 rounded-lg transition-all hover:scale-110 flex-shrink-0" style={{
-                background: c,
-                outline: form.color === c ? `3px solid ${c}` : 'none',
-                outlineOffset: '2px',
-                boxShadow: form.color === c ? '0 0 0 2px white' : 'none',
-            }} title={c}/>))}
-            <input type="color" value={form.color} onChange={e => set('color', e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border border-border" title="Custom color"/>
+            {COLOR_PRESETS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                disabled={loading}
+                onClick={() => setField('color', color)}
+                className="w-8 h-8 rounded-lg transition-all hover:scale-110"
+                style={{ background: color, outline: form.color === color ? `3px solid ${color}` : 'none', outlineOffset: '2px' }}
+                aria-label={`Select color ${color}`}
+              />
+            ))}
+            <input type="color" value={form.color} disabled={loading} onChange={(event) => setField('color', event.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border border-border" />
           </div>
         </FormField>
 
-        {/* Notes */}
-        <FormField label="Notes" hint="Optional description">
-          <textarea className="finova-input w-full text-sm resize-none" rows={2} placeholder="e.g. Main spending account" value={form.notes} onChange={e => set('notes', e.target.value)}/>
+        <FormField label="Notes" hint="Optional description" error={errors.notes}>
+          <textarea className="finova-input w-full text-sm resize-none" rows={2} value={form.notes} onChange={(event) => setField('notes', event.target.value)} disabled={loading} />
         </FormField>
 
-        {/* Preview card */}
-        <div className="rounded-xl border border-border p-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl" style={{ background: form.color }}/>
+        <div className="rounded-xl border border-border p-4" style={{ borderTopColor: form.color }}>
           <p className="text-xs text-muted-foreground mb-1">Preview</p>
           <p className="font-bold text-foreground">{form.name || 'Account Name'}</p>
           <p className="text-xs text-muted-foreground capitalize">{form.type.replace('_', ' ')}</p>
-          <p className="text-lg font-bold mt-2 text-foreground">
-            {form.balance ? new Intl.NumberFormat('en-US', { style: 'currency', currency: form.currency }).format(Number(form.balance)) : '$0.00'}
+          <p className={`text-lg font-bold mt-2 ${Number(form.balance) < 0 ? 'text-red-500' : 'text-foreground'}`}>
+            {new Intl.NumberFormat('en-US', { style: 'currency', currency: form.currency }).format(Number(form.balance || 0))}
           </p>
         </div>
       </div>
-    </Modal>);
+    </Modal>
+  )
 }

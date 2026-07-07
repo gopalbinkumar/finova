@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, CheckCircle2, Clock, Pencil, Trash2, Zap } from 'lucide-react';
 import { ProgressBar, SectionHeader } from '@/components/ui/Cards';
+import { ConfirmDeleteModal, EditRecordModal } from '@/components/ui/RecordActions';
 import { mockGoals } from '@/data/mockData';
 import { AddGoalModal } from '@/components/modals/AddGoalModal';
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -9,14 +10,28 @@ const daysLeft = (deadline) => {
     const diff = new Date(deadline).getTime() - Date.now();
     return Math.ceil(diff / 86_400_000);
 };
+const goalFields = [
+    { key: 'name', label: 'Goal Name', required: true, placeholder: 'Goal name' },
+    { key: 'deadline', label: 'Target Date', type: 'date' },
+    { key: 'target', label: 'Target Amount', type: 'number', leftDecor: '$', min: '0', step: '100' },
+    { key: 'current', label: 'Already Saved', type: 'number', leftDecor: '$', min: '0', step: '100' },
+    { key: 'icon', label: 'Icon', placeholder: 'Emoji' },
+    { key: 'color', label: 'Goal Color', type: 'color' },
+    { key: 'notes', label: 'Notes', type: 'textarea', fullWidth: true, placeholder: 'Goal notes' },
+];
 export function GoalsPage() {
+    const [goals, setGoals] = useState(mockGoals);
     const [showModal, setShowModal] = useState(false);
-    const completed = mockGoals.filter(g => g.current >= g.target);
-    const active = mockGoals.filter(g => g.current < g.target);
-    const totalSaved = mockGoals.reduce((s, g) => s + g.current, 0);
-    const totalTarget = mockGoals.reduce((s, g) => s + g.target, 0);
+    const [editing, setEditing] = useState(null);
+    const [deleting, setDeleting] = useState(null);
+    const completed = goals.filter(g => g.current >= g.target);
+    const active = goals.filter(g => g.current < g.target);
+    const totalSaved = goals.reduce((s, g) => s + g.current, 0);
+    const totalTarget = goals.reduce((s, g) => s + g.target, 0);
     return (<>
       <AddGoalModal open={showModal} onClose={() => setShowModal(false)}/>
+      <EditRecordModal open={!!editing} onClose={() => setEditing(null)} title="Edit Goal" subtitle="Update progress for this dummy goal" record={editing} fields={goalFields} iconColor={editing?.color} onSave={(next) => setGoals(items => items.map(item => item.id === next.id ? next : item))}/>
+      <ConfirmDeleteModal open={!!deleting} onClose={() => setDeleting(null)} itemName={deleting?.name} itemType="goal" onConfirm={() => setGoals(items => items.filter(item => item.id !== deleting?.id))}/>
 
       <div className="space-y-6 animate-in">
         {/* Summary banner */}
@@ -31,7 +46,7 @@ export function GoalsPage() {
           </div>
           <div className="finova-card text-center">
             <p className="text-xs text-muted-foreground">Goals Completed</p>
-            <p className="text-2xl font-bold text-foreground mt-1">{completed.length} / {mockGoals.length}</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{completed.length} / {goals.length}</p>
           </div>
         </div>
 
@@ -78,10 +93,10 @@ export function GoalsPage() {
             return (<div key={g.id} className="finova-card group relative hover:shadow-lg transition-all">
                   {/* Hover actions */}
                   <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+                    <button onClick={() => setEditing(g)} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground" aria-label={`Edit ${g.name}`}>
                       <Pencil size={14}/>
                     </button>
-                    <button className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500">
+                    <button onClick={() => setDeleting(g)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500" aria-label={`Delete ${g.name}`}>
                       <Trash2 size={14}/>
                     </button>
                   </div>

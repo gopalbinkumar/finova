@@ -34,40 +34,40 @@ export function InvestmentsPage() {
     return (<>
       <AddInvestmentModal open={showModal} onClose={() => setShowModal(false)}/>
 
-      <div className="space-y-6 animate-in">
+      <div className="min-w-0 max-w-full space-y-4 sm:space-y-6 animate-in overflow-x-hidden">
         {/* Portfolio hero banner */}
-        <div className="relative rounded-2xl overflow-hidden p-6 text-white" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' }}>
+        <div className="relative min-w-0 rounded-2xl overflow-hidden p-4 sm:p-6 text-white" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' }}>
           <div className="relative z-10">
             <p className="text-white/60 text-sm mb-1">Total Portfolio Value</p>
-            <p className="text-4xl font-bold mb-2">{fmt(totalValue)}</p>
-            <div className="flex items-center gap-2">
+            <p className="text-2xl min-[380px]:text-3xl sm:text-4xl font-bold mb-2 break-words">{fmt(totalValue)}</p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               {totalGain >= 0 ? (<TrendingUp size={18} className="text-green-400"/>) : (<TrendingDown size={18} className="text-red-400"/>)}
               <span className={`font-semibold ${totalGain >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {totalGain >= 0 ? '+' : ''}{fmt(totalGain)} ({fmtPct(totalPct)})
               </span>
-              <span className="text-white/50 text-sm">total return</span>
+              <span className="w-full min-[420px]:w-auto text-white/50 text-sm">total return</span>
             </div>
           </div>
         </div>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 stagger">
+        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 stagger">
           {[
             { title: 'Invested', value: fmt(totalCost), color: '#3B82F6' },
             { title: 'Return', value: fmt(totalGain), color: totalGain >= 0 ? '#2563EB' : '#EF4444' },
             { title: 'Return %', value: fmtPct(totalPct), color: totalPct >= 0 ? '#2563EB' : '#EF4444' },
             { title: 'Assets', value: `${mockInvestments.length}`, color: '#8B5CF6' },
-        ].map(s => (<div key={s.title} className="finova-card text-center animate-in">
+        ].map(s => (<div key={s.title} className="finova-card min-w-0 p-4 sm:p-6 text-center animate-in overflow-hidden">
               <p className="text-xs text-muted-foreground">{s.title}</p>
-              <p className="text-xl font-bold mt-1" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-base sm:text-xl font-bold mt-1 break-words tabular-nums" style={{ color: s.color }}>{s.value}</p>
             </div>))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid min-w-0 max-w-full lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main column */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="min-w-0 max-w-full lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Growth chart */}
-            <div className="finova-card">
+            <div className="finova-card min-w-0 max-w-full p-4 sm:p-6 overflow-hidden">
               <SectionHeader title="Portfolio Growth" subtitle="6-month performance"/>
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={portfolioHistory}>
@@ -81,17 +81,17 @@ export function InvestmentsPage() {
             </div>
 
             {/* Holdings table */}
-            <div className="finova-card">
-              <div className="flex items-center justify-between mb-5">
+            <div className="finova-card min-w-0 max-w-full p-4 sm:p-6 overflow-hidden">
+              <div className="flex flex-col min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between gap-3 mb-5">
                 <SectionHeader title="Holdings"/>
-                <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2 text-sm px-4 py-2">
+                <button onClick={() => setShowModal(true)} className="btn-primary self-start min-[420px]:self-auto flex items-center gap-2 text-sm px-4 py-2 whitespace-nowrap">
                   <Plus size={16}/>
                   Add Investment
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="finova-table">
+              <div className="w-full max-w-full overflow-x-auto overscroll-x-contain">
+                <table className="finova-table min-w-[760px]">
                   <thead>
                     <tr>
                       <th>Asset</th>
@@ -148,9 +148,9 @@ export function InvestmentsPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="min-w-0 max-w-full space-y-4 sm:space-y-6">
             {/* Allocation donut */}
-            <div className="finova-card">
+            <div className="finova-card min-w-0 max-w-full p-4 sm:p-6 overflow-hidden">
               <SectionHeader title="Allocation" subtitle="By asset class"/>
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
@@ -161,18 +161,18 @@ export function InvestmentsPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="space-y-2 mt-2">
-                {investmentAllocationData.map(d => (<div key={d.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
+                {investmentAllocationData.map(d => (<div key={d.name} className="flex min-w-0 items-center justify-between gap-3 text-xs">
+                    <div className="flex min-w-0 items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }}/>
-                      <span className="text-muted-foreground">{d.name}</span>
+                      <span className="truncate text-muted-foreground">{d.name}</span>
                     </div>
-                    <span className="font-semibold text-foreground">{fmt(d.value)}</span>
+                    <span className="shrink-0 text-right font-semibold text-foreground tabular-nums">{fmt(d.value)}</span>
                   </div>))}
               </div>
             </div>
 
             {/* Top performers */}
-            <div className="finova-card">
+            <div className="finova-card min-w-0 max-w-full p-4 sm:p-6 overflow-hidden">
               <SectionHeader title="Top Performers"/>
               <div className="space-y-3">
                 {[...mockInvestments]
@@ -181,15 +181,15 @@ export function InvestmentsPage() {
             .slice(0, 4)
             .map(inv => {
             const pct = ((inv.currentPrice - inv.avgCost) / inv.avgCost) * 100;
-            return (<div key={inv.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+            return (<div key={inv.id} className="flex min-w-0 items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2">
                           <span className="text-lg">{typeIcon(inv.type)}</span>
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm font-bold text-foreground">{inv.symbol}</p>
                             <p className="text-xs text-muted-foreground">{inv.qty} units</p>
                           </div>
                         </div>
-                        <span className={`text-sm font-bold ${pct >= 0 ? 'text-primary-500' : 'text-red-500'}`}>
+                        <span className={`shrink-0 text-sm font-bold ${pct >= 0 ? 'text-primary-500' : 'text-red-500'}`}>
                           {fmtPct(pct)}
                         </span>
                       </div>);

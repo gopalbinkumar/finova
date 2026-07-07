@@ -1,18 +1,32 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { ProgressBar, SectionHeader } from '@/components/ui/Cards';
+import { ConfirmDeleteModal, EditRecordModal } from '@/components/ui/RecordActions';
 import { mockBudgets } from '@/data/mockData';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { AddBudgetModal } from '@/components/modals/AddBudgetModal';
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
-const totalBudget = mockBudgets.reduce((s, b) => s + b.limit, 0);
-const totalSpent = mockBudgets.reduce((s, b) => s + b.spent, 0);
-const overBudget = mockBudgets.filter(b => b.spent > b.limit);
+const budgetFields = [
+    { key: 'category', label: 'Category', required: true, placeholder: 'Category' },
+    { key: 'period', label: 'Period', placeholder: 'June 2024' },
+    { key: 'limit', label: 'Budget Limit', type: 'number', leftDecor: '$', min: '0', step: '0.01' },
+    { key: 'spent', label: 'Amount Spent', type: 'number', leftDecor: '$', min: '0', step: '0.01' },
+    { key: 'icon', label: 'Icon', placeholder: 'Emoji' },
+    { key: 'color', label: 'Budget Color', type: 'color' },
+];
 export function BudgetPage() {
+    const [budgets, setBudgets] = useState(mockBudgets);
     const [period] = useState('June 2024');
     const [showModal, setShowModal] = useState(false);
+    const [editing, setEditing] = useState(null);
+    const [deleting, setDeleting] = useState(null);
+    const totalBudget = budgets.reduce((s, b) => s + b.limit, 0);
+    const totalSpent = budgets.reduce((s, b) => s + b.spent, 0);
+    const overBudget = budgets.filter(b => b.spent > b.limit);
     return (<>
       <AddBudgetModal open={showModal} onClose={() => setShowModal(false)}/>
+      <EditRecordModal open={!!editing} onClose={() => setEditing(null)} title="Edit Budget" subtitle="Adjust this dummy budget" record={editing} fields={budgetFields} iconColor={editing?.color} onSave={(next) => setBudgets(items => items.map(item => item.id === next.id ? next : item))}/>
+      <ConfirmDeleteModal open={!!deleting} onClose={() => setDeleting(null)} itemName={deleting?.category} itemType="budget" onConfirm={() => setBudgets(items => items.filter(item => item.id !== deleting?.id))}/>
 
       <div className="space-y-6 animate-in">
         {/* Summary */}
@@ -61,7 +75,7 @@ export function BudgetPage() {
             </div>
 
             <div className="space-y-5">
-              {mockBudgets.map(budget => {
+              {budgets.map(budget => {
             const pct = (budget.spent / budget.limit) * 100;
             const isOver = pct > 100;
             const isWarn = pct > 80 && !isOver;
@@ -85,10 +99,10 @@ export function BudgetPage() {
                           </span>)}
                         {isOver ? (<AlertCircle size={16} className="text-red-500"/>) : pct === 100 ? (<CheckCircle2 size={16} className="text-primary-500"/>) : null}
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground">
+                          <button onClick={() => setEditing(budget)} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground" aria-label={`Edit ${budget.category} budget`}>
                             <Pencil size={12}/>
                           </button>
-                          <button className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500">
+                          <button onClick={() => setDeleting(budget)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500" aria-label={`Delete ${budget.category} budget`}>
                             <Trash2 size={12}/>
                           </button>
                         </div>
@@ -123,14 +137,14 @@ export function BudgetPage() {
               <SectionHeader title="Spending Breakdown"/>
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
-                  <Pie data={mockBudgets.map(b => ({ name: b.category, value: b.spent }))} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" stroke="none">
-                    {mockBudgets.map((b, i) => <Cell key={i} fill={b.color}/>)}
+                  <Pie data={budgets.map(b => ({ name: b.category, value: b.spent }))} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" stroke="none">
+                    {budgets.map((b) => <Cell key={b.id} fill={b.color}/>)}
                   </Pie>
                   <Tooltip formatter={(v) => fmt(Number(v))}/>
                 </PieChart>
               </ResponsiveContainer>
               <div className="space-y-2 mt-2">
-                {mockBudgets.map(b => (<div key={b.id} className="flex items-center justify-between text-xs">
+                {budgets.map(b => (<div key={b.id} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full" style={{ background: b.color }}/>
                       <span className="text-muted-foreground">{b.category}</span>

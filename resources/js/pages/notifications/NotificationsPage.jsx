@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Cards';
+import { ConfirmDeleteModal } from '@/components/ui/RecordActions';
 import { mockNotifications } from '@/data/mockData';
 const fmtTime = (iso) => {
     const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -24,12 +25,14 @@ const typeBadge = (type) => {
 export function NotificationsPage() {
     const [notifications, setNotifications] = useState(mockNotifications);
     const [filter, setFilter] = useState('all');
+    const [deleting, setDeleting] = useState(null);
     const unread = notifications.filter(n => !n.read).length;
     const visible = filter === 'unread' ? notifications.filter(n => !n.read) : notifications;
     const markRead = (id) => setNotifications(ns => ns.map(n => n.id === id ? { ...n, read: true } : n));
     const markAll = () => setNotifications(ns => ns.map(n => ({ ...n, read: true })));
-    const dismiss = (id) => setNotifications(ns => ns.filter(n => n.id !== id));
-    return (<div className="space-y-6 animate-in max-w-2xl mx-auto">
+    return (<>
+    <ConfirmDeleteModal open={!!deleting} onClose={() => setDeleting(null)} itemName={deleting?.title} itemType="notification" onConfirm={() => setNotifications(items => items.filter(item => item.id !== deleting?.id))}/>
+    <div className="space-y-6 animate-in max-w-2xl mx-auto">
       {/* Header */}
       <div className="finova-card flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -91,7 +94,7 @@ export function NotificationsPage() {
                   {!notif.read && (<button onClick={e => { e.stopPropagation(); markRead(notif.id); }} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Mark read">
                       <Check size={14}/>
                     </button>)}
-                  <button onClick={e => { e.stopPropagation(); dismiss(notif.id); }} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500 transition-colors" title="Dismiss">
+                  <button onClick={e => { e.stopPropagation(); setDeleting(notif); }} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-500 transition-colors" title="Dismiss" aria-label={`Delete ${notif.title}`}>
                     <Trash2 size={14}/>
                   </button>
                 </div>
@@ -106,5 +109,6 @@ export function NotificationsPage() {
           <a href="/profile" className="text-primary-500 hover:underline font-medium">Profile Settings</a>
         </p>
       </div>
-    </div>);
+    </div>
+    </>);
 }
