@@ -68,11 +68,25 @@ export const mockBudgets = [
 ];
 // ─── Financial Goals ─────────────────────────────────────────────────────────
 export const mockGoals = [
-    { id: 1, name: 'Emergency Fund', icon: '🛡️', target: 20000, current: 14500, deadline: '2024-12-31', notes: '6 months of expenses', color: '#2563EB' },
-    { id: 2, name: 'MacBook Pro', icon: '💻', target: 3500, current: 2100, deadline: '2024-09-30', notes: 'For work and side projects', color: '#3B82F6' },
-    { id: 3, name: 'Vacation - Bali', icon: '🌴', target: 5000, current: 1800, deadline: '2025-03-01', notes: '10 days trip', color: '#F59E0B' },
-    { id: 4, name: 'Down Payment', icon: '🏠', target: 50000, current: 18900, deadline: '2026-06-30', notes: 'House down payment 20%', color: '#8B5CF6' },
-    { id: 5, name: 'New Car', icon: '🚗', target: 25000, current: 25000, deadline: '2024-05-01', notes: 'Honda Civic 2024', color: '#10B981' },
+    { id: 1, name: 'Emergency Fund', icon: '🛡️', target: 20000, current: 14500, deadline: '2024-12-31', notes: '6 months of expenses', color: '#2563EB', allocations: [
+        { account_id: 2, amount: 12000, notes: 'Main emergency savings' },
+        { account_id: 3, amount: 2500, notes: 'Cash reserve' },
+    ] },
+    { id: 2, name: 'MacBook Pro', icon: '💻', target: 3500, current: 2100, deadline: '2024-09-30', notes: 'For work and side projects', color: '#3B82F6', allocations: [
+        { account_id: 2, amount: 2100, notes: 'Device savings' },
+    ] },
+    { id: 3, name: 'Vacation - Bali', icon: '🌴', target: 5000, current: 1800, deadline: '2025-03-01', notes: '10 days trip', color: '#F59E0B', allocations: [
+        { account_id: 1, amount: 1300, notes: 'Flight and hotel' },
+        { account_id: 5, amount: 500, notes: 'Daily expenses' },
+    ] },
+    { id: 4, name: 'Down Payment', icon: '🏠', target: 50000, current: 18900, deadline: '2026-06-30', notes: 'House down payment 20%', color: '#8B5CF6', allocations: [
+        { account_id: 2, amount: 15000, notes: 'Primary house fund' },
+        { account_id: 6, amount: 3900, notes: 'Investment allocation' },
+    ] },
+    { id: 5, name: 'New Car', icon: '🚗', target: 25000, current: 25000, deadline: '2024-05-01', notes: 'Honda Civic 2024', color: '#10B981', allocations: [
+        { account_id: 1, amount: 10000, notes: 'Checking allocation' },
+        { account_id: 2, amount: 15000, notes: 'Savings allocation' },
+    ] },
 ];
 // ─── Investments ──────────────────────────────────────────────────────────────
 export const mockInvestments = [

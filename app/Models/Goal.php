@@ -3,23 +3,23 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Goal;
-use App\Models\GoalAccount;
 
-class Account extends Model
+class Goal extends Model
 {
     protected $fillable = [
         'user_id',
         'name',
-        'type',
-        'currency',
-        'balance',
+        'target_amount',
+        'deadline',
+        'icon',
         'color',
         'notes',
+        'status',
     ];
 
     protected $casts = [
-        'balance' => 'decimal:2',
+        'target_amount' => 'decimal:2',
+        'deadline' => 'date:Y-m-d',
     ];
 
     public function user()
@@ -27,24 +27,14 @@ class Account extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
-    public function incomingTransfers()
-    {
-        return $this->hasMany(Transaction::class, 'to_account_id');
-    }
-
     public function goalAccounts()
     {
         return $this->hasMany(GoalAccount::class);
     }
 
-    public function goals()
+    public function accounts()
     {
-        return $this->belongsToMany(Goal::class, 'goal_accounts')
+        return $this->belongsToMany(Account::class, 'goal_accounts')
             ->withPivot(['amount', 'notes'])
             ->withTimestamps();
     }

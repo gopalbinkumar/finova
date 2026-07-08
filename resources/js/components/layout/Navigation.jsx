@@ -276,9 +276,9 @@ export function Topbar({ onMenuClick, pageTitle }) {
 // ─── Mobile Bottom Navigation ─────────────────────────────────────────────────
 
 const bottomNavItems = [
-    { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
     { to: "/transactions", icon: ArrowLeftRight, label: "Txns" },
     { to: "/budget", icon: PieChart, label: "Budget" },
+    { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
     { to: "/goals", icon: Target, label: "Goals" },
     { to: "/accounts", icon: Wallet, label: "Accounts" },
 ];

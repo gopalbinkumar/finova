@@ -8,6 +8,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Account;
+use App\Models\Category;
+use App\Models\Transaction;
+use App\Models\Budget;
+use App\Models\Goal;
+use App\Models\GoalAccount;
 
 class User extends Authenticatable
 {
@@ -76,5 +81,25 @@ class User extends Authenticatable
     public function accounts()
     {
         return $this->hasMany(Account::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function budgets()
+    {
+        return $this->hasMany(Budget::class);
+    }
+
+    public function goals()
+    {
+        return $this->hasMany(Goal::class);
+    }
+
+    public function goalAccounts()
+    {
+        return $this->hasMany(GoalAccount::class);
     }
 }
