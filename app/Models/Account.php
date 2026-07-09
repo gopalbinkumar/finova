@@ -37,6 +37,16 @@ class Account extends Model
         return $this->hasMany(Transaction::class, 'to_account_id');
     }
 
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+
+    public function investmentTransactions()
+    {
+        return $this->hasMany(InvestmentTransaction::class);
+    }
+
     public function goalAccounts()
     {
         return $this->hasMany(GoalAccount::class);

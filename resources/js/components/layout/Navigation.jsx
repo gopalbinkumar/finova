@@ -114,7 +114,7 @@ export function Sidebar({
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+            <nav className="flex-1 overflow-y-auto no-scrollbar py-4 px-2 space-y-1">
                 {navItems.map(({ to, icon: Icon, label }) => (
                     <NavLink
                         key={to}

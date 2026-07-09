@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\GoalController;
+use App\Http\Controllers\Api\InvestmentController;
+use App\Http\Controllers\Api\DebtController;
 
 
 Route::prefix('auth')->group(function () {
@@ -26,4 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('budgets', BudgetController::class);
     Route::apiResource('goals', GoalController::class);
     Route::put('goals/{goal}/allocations', [GoalController::class, 'updateAllocations']);
+    Route::get('investments/pnl', [InvestmentController::class, 'pnl']);
+    Route::apiResource('investments', InvestmentController::class);
+    Route::post('investments/{investment}/buy', [InvestmentController::class, 'buy']);
+    Route::post('investments/{investment}/sell', [InvestmentController::class, 'sell']);
+    Route::apiResource('debts', DebtController::class);
 });

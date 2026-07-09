@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class AccountController extends Controller
 {
@@ -157,6 +158,16 @@ class AccountController extends Controller
             ],
         ]);
 
+        if (
+            $account->type === 'investment'
+            && $validated['type'] !== 'investment'
+            && $account->investments()->withTrashed()->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'type' => ['An account containing investments must remain an investment account.'],
+            ]);
+        }
+
         $account->update([
             'name' => trim($validated['name']),
             'type' => $validated['type'],
@@ -175,6 +186,12 @@ class AccountController extends Controller
     public function destroy(Request $request, Account $account)
     {
         abort_unless($account->user_id === $request->user()->id, 403);
+
+        if ($account->investments()->withTrashed()->exists() || $account->investmentTransactions()->exists()) {
+            throw ValidationException::withMessages([
+                'account' => ['This investment account has asset history and cannot be deleted.'],
+            ]);
+        }
 
         $account->delete();
 

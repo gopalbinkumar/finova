@@ -88,6 +88,16 @@ class User extends Authenticatable
         return $this->hasMany(Transaction::class);
     }
 
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+
+    public function investmentTransactions()
+    {
+        return $this->hasMany(InvestmentTransaction::class);
+    }
+
     public function budgets()
     {
         return $this->hasMany(Budget::class);

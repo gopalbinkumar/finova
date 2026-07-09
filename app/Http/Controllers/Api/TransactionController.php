@@ -129,6 +129,12 @@ class TransactionController extends Controller
     {
         abort_unless($transaction->user_id === $request->user()->id, 403);
 
+        if ($transaction->source_type) {
+            throw ValidationException::withMessages([
+                'transaction' => ['Investment-generated transactions must be managed from the Investment page.'],
+            ]);
+        }
+
         $validated = $this->validateTransaction($request);
 
         $transaction = DB::transaction(function () use ($request, $transaction, $validated) {
@@ -181,6 +187,12 @@ class TransactionController extends Controller
     public function destroy(Request $request, Transaction $transaction)
     {
         abort_unless($transaction->user_id === $request->user()->id, 403);
+
+        if ($transaction->source_type) {
+            throw ValidationException::withMessages([
+                'transaction' => ['Investment-generated transactions must be managed from the Investment page.'],
+            ]);
+        }
 
         DB::transaction(function () use ($transaction) {
             // Kembalikan saldo sebelum transaksi dihapus
@@ -274,6 +286,10 @@ class TransactionController extends Controller
 
     private function applyTransactionToBalance(Transaction $transaction): void
     {
+        if (!$transaction->affects_balance) {
+            return;
+        }
+
         $amount = (float) $transaction->amount;
 
         if ($transaction->type === 'income') {
@@ -301,6 +317,10 @@ class TransactionController extends Controller
 
     private function reverseTransactionFromBalance(Transaction $transaction): void
     {
+        if (!$transaction->affects_balance) {
+            return;
+        }
+
         $amount = (float) $transaction->amount;
 
         if ($transaction->type === 'income') {
@@ -334,6 +354,10 @@ class TransactionController extends Controller
 
             'type' => $transaction->type,
             'amount' => (float) $transaction->amount,
+            'affects_balance' => (bool) $transaction->affects_balance,
+            'source_type' => $transaction->source_type,
+            'source_id' => $transaction->source_id,
+            'investment_id' => $transaction->investment_id,
             'date' => optional($transaction->date)->format('Y-m-d'),
 
             'description' => $transaction->description,

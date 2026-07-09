@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
+    protected $attributes = [
+        'affects_balance' => true,
+    ];
+
     protected $fillable = [
         'user_id',
         'account_id',
@@ -13,6 +17,10 @@ class Transaction extends Model
         'category_id',
         'type',
         'amount',
+        'affects_balance',
+        'source_type',
+        'source_id',
+        'investment_id',
         'date',
         'description',
         'notes',
@@ -20,6 +28,7 @@ class Transaction extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'affects_balance' => 'boolean',
         'date' => 'date:Y-m-d',
     ];
 
@@ -41,5 +50,10 @@ class Transaction extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function investment()
+    {
+        return $this->belongsTo(Investment::class)->withTrashed();
     }
 }
