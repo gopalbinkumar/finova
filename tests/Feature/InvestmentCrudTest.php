@@ -138,6 +138,13 @@ class InvestmentCrudTest extends TestCase
         $this->assertSoftDeleted('investments', ['id' => $investment['id']]);
         $this->assertDatabaseCount('investment_transactions', 3);
         $this->assertDatabaseCount('transactions', 3);
+        $this->assertDatabaseHas('transactions', [
+            'investment_id' => $investment['id'],
+            'source_type' => 'investment_performance',
+            'type' => 'expense',
+            'amount' => 150,
+            'affects_balance' => false,
+        ]);
 
         $this->getJson('/api/investments/pnl')
             ->assertOk()

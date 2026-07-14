@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Wallet } from 'lucide-react'
 import { FormField, Input, Modal, ModalFooter, Select } from '@/components/ui/Modal'
+import { CURRENCIES, useCurrencyFormatter } from '@/utils/currency'
 
 const TYPE_OPTIONS = [
   { value: 'bank', label: '🏦 Bank Account' },
@@ -9,22 +10,23 @@ const TYPE_OPTIONS = [
   { value: 'e_wallet', label: '📱 E-Wallet' },
   { value: 'investment', label: '📈 Investment Account' },
 ]
-const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'IDR', 'JPY', 'SGD'].map((value) => ({ value, label: value }))
+const CURRENCY_OPTIONS = CURRENCIES.map((value) => ({ value, label: value }))
 const COLOR_PRESETS = ['#2563EB', '#3B82F6', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#64748B', '#0F172A']
-const INITIAL = { name: '', type: 'bank', currency: 'USD', balance: '', color: '#2563EB', notes: '' }
 
 export function AddAccountModal({ open, onClose, onCreate }) {
-  const [form, setForm] = useState(INITIAL)
+  const { currency, formatCurrency } = useCurrencyFormatter()
+  const initial = { name: '', type: 'bank', currency, balance: '', color: '#2563EB', notes: '' }
+  const [form, setForm] = useState(initial)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
 
   useEffect(() => {
     if (!open) return
-    setForm(INITIAL)
+    setForm(initial)
     setErrors({})
     setDone(false)
-  }, [open])
+  }, [open, currency])
 
   const setField = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -124,7 +126,7 @@ export function AddAccountModal({ open, onClose, onCreate }) {
           <p className="font-bold text-foreground">{form.name || 'Account Name'}</p>
           <p className="text-xs text-muted-foreground capitalize">{form.type.replace('_', ' ')}</p>
           <p className={`text-lg font-bold mt-2 ${Number(form.balance) < 0 ? 'text-red-500' : 'text-foreground'}`}>
-            {new Intl.NumberFormat('en-US', { style: 'currency', currency: form.currency }).format(Number(form.balance || 0))}
+            {formatCurrency(Number(form.balance || 0), { currency: form.currency })}
           </p>
         </div>
       </div>

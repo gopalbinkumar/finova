@@ -7,13 +7,14 @@ import {
     AddBudgetModal,
     EditBudgetModal,
 } from "@/components/modals/AddBudgetModal";
+import {
+    BudgetListSkeleton,
+    ChartSkeleton,
+    Skeleton,
+    SkeletonCard,
+} from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
-
-const fmt = (value) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(Number(value || 0));
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const toNumber = (value) => {
     const number = Number(value);
@@ -57,6 +58,7 @@ const generatePeriodOptions = () => {
 const PERIOD_OPTIONS = generatePeriodOptions();
 
 export function BudgetPage() {
+    const { formatCurrency: fmt } = useCurrencyFormatter();
     const [budgets, setBudgets] = useState([]);
     const [period, setPeriod] = useState(getCurrentMonth());
 
@@ -244,47 +246,57 @@ export function BudgetPage() {
             <div className="space-y-6 animate-in">
                 {/* Summary */}
                 <div className="grid sm:grid-cols-3 gap-4">
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground mb-1">
-                            Total Budget
-                        </p>
+                    {loading ? (
+                        <>
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                        </>
+                    ) : (
+                        <>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground mb-1">
+                                    Total Budget
+                                </p>
 
-                        <p className="text-2xl font-bold text-foreground">
-                            {fmt(totalBudget)}
-                        </p>
-                    </div>
+                                <p className="text-2xl font-bold text-foreground">
+                                    {fmt(totalBudget)}
+                                </p>
+                            </div>
 
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground mb-1">
-                            Total Spent
-                        </p>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground mb-1">
+                                    Total Spent
+                                </p>
 
-                        <p
-                            className={`text-2xl font-bold ${
-                                totalSpent > totalBudget && totalBudget > 0
-                                    ? "text-red-500"
-                                    : "text-foreground"
-                            }`}
-                        >
-                            {fmt(totalSpent)}
-                        </p>
-                    </div>
+                                <p
+                                    className={`text-2xl font-bold ${
+                                        totalSpent > totalBudget && totalBudget > 0
+                                            ? "text-red-500"
+                                            : "text-foreground"
+                                    }`}
+                                >
+                                    {fmt(totalSpent)}
+                                </p>
+                            </div>
 
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground mb-1">
-                            Remaining
-                        </p>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground mb-1">
+                                    Remaining
+                                </p>
 
-                        <p
-                            className={`text-2xl font-bold ${
-                                totalBudget - totalSpent < 0
-                                    ? "text-red-500"
-                                    : "text-primary-500"
-                            }`}
-                        >
-                            {fmt(remaining)}
-                        </p>
-                    </div>
+                                <p
+                                    className={`text-2xl font-bold ${
+                                        totalBudget - totalSpent < 0
+                                            ? "text-red-500"
+                                            : "text-primary-500"
+                                    }`}
+                                >
+                                    {fmt(remaining)}
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Error */}
@@ -358,9 +370,7 @@ export function BudgetPage() {
                         </div>
 
                         {loading ? (
-                            <div className="py-10 text-center text-sm text-muted-foreground">
-                                Loading budgets...
-                            </div>
+                            <BudgetListSkeleton />
                         ) : budgets.length === 0 ? (
                             <div className="py-10 text-center text-sm text-muted-foreground border border-dashed border-border rounded-xl">
                                 No budgets found for {periodLabel}.
@@ -513,7 +523,9 @@ export function BudgetPage() {
                         <div className="finova-card">
                             <SectionHeader title="Spending Breakdown" />
 
-                            {pieData.length === 0 ? (
+                            {loading ? (
+                                <ChartSkeleton type="donut" />
+                            ) : pieData.length === 0 ? (
                                 <div className="h-[180px] flex items-center justify-center text-sm text-muted-foreground">
                                     No spending data yet.
                                 </div>
@@ -546,7 +558,7 @@ export function BudgetPage() {
                                 </ResponsiveContainer>
                             )}
 
-                            <div className="space-y-2 mt-2">
+                            {!loading && <div className="space-y-2 mt-2">
                                 {budgets.map((budget) => (
                                     <div
                                         key={budget.id}
@@ -578,13 +590,19 @@ export function BudgetPage() {
                                         No budget categories yet.
                                     </p>
                                 )}
-                            </div>
+                            </div>}
                         </div>
 
                         {/* Health score */}
                         <div className="finova-card">
                             <SectionHeader title="Budget Health" />
 
+                            {loading ? (
+                                <div className="py-4">
+                                    <Skeleton className="mx-auto h-28 w-28 rounded-full" />
+                                    <Skeleton className="mx-auto mt-4 h-4 w-28" />
+                                </div>
+                            ) : (
                             <div className="text-center py-4">
                                 <div className="relative inline-flex items-center justify-center">
                                     <svg
@@ -633,6 +651,7 @@ export function BudgetPage() {
                                             : "✅ On Track"}
                                 </p>
                             </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -29,24 +29,21 @@ export const authService = {
   },
 
   async updateProfile(data) {
-    const current = await this.me()
-    return mockResponse({ ...current.data.data.user, ...data })
+    return api.put('/auth/profile', data)
   },
 
-  async changePassword() {
-    return mockResponse(null, 'Password changed in demo mode')
+  async changePassword(data) {
+    return api.post('/auth/change-password', data)
   },
 
   async uploadAvatar(file) {
-    const current = await this.me()
-    return mockResponse({
-      ...current.data.data.user,
-      avatar_url: URL.createObjectURL(file),
-    })
+    const formData = new FormData()
+    formData.append('avatar', file)
+
+    return api.post('/auth/avatar', formData)
   },
 
   async deleteAvatar() {
-    const current = await this.me()
-    return mockResponse({ ...current.data.data.user, avatar_url: null })
+    return api.delete('/auth/avatar')
   },
 }

@@ -1,5 +1,9 @@
 /** Format a value as USD currency for Recharts tooltip */
-export const fmtTooltip = (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(v));
-export const fmtTooltipFull = (v) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(v));
-export const fmtCurrency = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
-export const fmtCurrencyShort = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+import { formatMoney } from "@/utils/currency";
+
+export const fmtTooltip = (v, options) =>
+    formatMoney(v, { ...options, minimumFractionDigits: 0, maximumFractionDigits: 0 });
+export const fmtTooltipFull = (v, options) => formatMoney(v, options);
+export const fmtCurrency = (n, options) => formatMoney(n, options);
+export const fmtCurrencyShort = (n, options) =>
+    formatMoney(n, { ...options, minimumFractionDigits: 0, maximumFractionDigits: 0 });

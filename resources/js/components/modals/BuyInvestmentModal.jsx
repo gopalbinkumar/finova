@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { FormField, Input, Modal, ModalFooter } from '@/components/ui/Modal';
+import { useCurrencyFormatter } from '@/utils/currency';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -12,12 +13,6 @@ const initialForm = () => ({
     date: today(),
     notes: '',
 });
-
-const fmt = (value) =>
-    new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(Number(value) || 0);
 
 const requestHeaders = () => {
     const token = document
@@ -32,6 +27,7 @@ const requestHeaders = () => {
 };
 
 export function BuyInvestmentModal({ open, investment, onClose, onSaved }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -160,13 +156,13 @@ export function BuyInvestmentModal({ open, investment, onClose, onSaved }) {
                         <Input type="number" min="0" step="0.00000001" value={form.qty} onChange={(event) => set('qty', event.target.value)} error={!!errors.qty} autoFocus />
                     </FormField>
                     <FormField label="Buy Price" required error={errors.price}>
-                        <Input type="number" min="0" step="0.00000001" value={form.price} onChange={(event) => set('price', event.target.value)} error={!!errors.price} leftDecor="$" />
+                        <Input type="number" min="0" step="0.00000001" value={form.price} onChange={(event) => set('price', event.target.value)} error={!!errors.price} leftDecor={symbol} />
                     </FormField>
                     <FormField label="Fee" error={errors.fee}>
-                        <Input type="number" min="0" step="0.01" value={form.fee} onChange={(event) => set('fee', event.target.value)} error={!!errors.fee} leftDecor="$" />
+                        <Input type="number" min="0" step="0.01" value={form.fee} onChange={(event) => set('fee', event.target.value)} error={!!errors.fee} leftDecor={symbol} />
                     </FormField>
                     <FormField label="Current Price" hint="Optional; defaults to buy price" error={errors.currentPrice}>
-                        <Input type="number" min="0" step="0.00000001" value={form.currentPrice} onChange={(event) => set('currentPrice', event.target.value)} error={!!errors.currentPrice} leftDecor="$" />
+                        <Input type="number" min="0" step="0.00000001" value={form.currentPrice} onChange={(event) => set('currentPrice', event.target.value)} error={!!errors.currentPrice} leftDecor={symbol} />
                     </FormField>
                 </div>
 

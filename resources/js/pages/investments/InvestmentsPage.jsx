@@ -9,6 +9,12 @@ import {
 } from "lucide-react";
 import { SectionHeader } from "@/components/ui/Cards";
 import {
+    ChartSkeleton,
+    Skeleton,
+    SkeletonList,
+    SkeletonTable,
+} from "@/components/ui/Skeleton";
+import {
     Modal,
     FormField,
     Input,
@@ -18,6 +24,7 @@ import {
 import { AddInvestmentModal } from "@/components/modals/AddInvestmentModal";
 import { BuyInvestmentModal } from "@/components/modals/BuyInvestmentModal";
 import { SellInvestmentModal } from "@/components/modals/SellInvestmentModal";
+import { useCurrencyFormatter } from "@/utils/currency";
 import {
     PieChart,
     Pie,
@@ -63,12 +70,6 @@ const INITIAL_FORM = {
     date: new Date().toISOString().slice(0, 10),
     notes: "",
 };
-
-const fmt = (n) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(Number(n) || 0);
 
 const fmtPct = (n) => {
     const value = Number.isFinite(Number(n)) ? Number(n) : 0;
@@ -699,6 +700,7 @@ function DeleteInvestmentModal({ open, investment, onClose, onDeleted }) {
 }
 
 export function InvestmentsPage() {
+    const { formatCurrency: fmt, formatCurrencyCompact } = useCurrencyFormatter();
     const [showModal, setShowModal] = useState(false);
     const [investments, setInvestments] = useState([]);
     const [investmentAccounts, setInvestmentAccounts] = useState([]);
@@ -902,9 +904,20 @@ export function InvestmentsPage() {
                         </p>
 
                         <p className="text-2xl min-[380px]:text-3xl sm:text-4xl font-bold mb-2 break-words">
-                            {loading ? "Loading..." : fmt(totalValue)}
+                            {loading ? (
+                                <span className="block h-10 w-64 max-w-full animate-pulse rounded-lg bg-white/25" />
+                            ) : (
+                                fmt(totalValue)
+                            )}
                         </p>
 
+                        {loading ? (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span className="h-5 w-5 animate-pulse rounded bg-white/20" />
+                                <span className="h-5 w-44 animate-pulse rounded bg-white/20" />
+                                <span className="h-5 w-24 animate-pulse rounded bg-white/10" />
+                            </div>
+                        ) : (
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             {totalGain >= 0 ? (
                                 <TrendingUp
@@ -933,6 +946,7 @@ export function InvestmentsPage() {
                                 total return
                             </span>
                         </div>
+                        )}
                     </div>
                 </div>
 
@@ -986,7 +1000,11 @@ export function InvestmentsPage() {
                                     className="mt-1 break-words text-lg font-bold tabular-nums sm:text-xl"
                                     style={{ color: stat.color }}
                                 >
-                                    {loading ? "..." : stat.value}
+                                    {loading ? (
+                                        <Skeleton className="mx-auto h-6 w-20" />
+                                    ) : (
+                                        stat.value
+                                    )}
                                 </p>
                             </div>
                         ))}
@@ -1008,7 +1026,11 @@ export function InvestmentsPage() {
                                 <p
                                     className={`text-xl sm:text-2xl font-bold tabular-nums ${pnlColor(pnl.totalPnl)}`}
                                 >
-                                    {pnlLoading ? "..." : fmt(pnl.totalPnl)}
+                                    {pnlLoading ? (
+                                        <Skeleton className="ml-auto h-7 w-28" />
+                                    ) : (
+                                        fmt(pnl.totalPnl)
+                                    )}
                                 </p>
                             </div>
                         </div>
@@ -1068,23 +1090,32 @@ export function InvestmentsPage() {
                                     <p
                                         className={`mt-1 break-words text-base font-bold tabular-nums ${color}`}
                                     >
-                                        {pnlLoading
-                                            ? "..."
-                                            : currency
-                                              ? fmt(value)
-                                              : value}
+                                        {pnlLoading ? (
+                                            <Skeleton className="mx-auto h-5 w-20" />
+                                        ) : currency ? (
+                                            fmt(value)
+                                        ) : (
+                                            value
+                                        )}
                                     </p>
                                 </div>
                             ))}
                         </div>
 
-                        <p className="mt-3 text-xs text-muted-foreground">
-                            {pnlLoading
-                                ? "Loading realized trades..."
-                                : `${pnl.realizedCount} realized trade${pnl.realizedCount === 1 ? "" : "s"} recorded`}
-                        </p>
+                        {pnlLoading ? (
+                            <Skeleton className="mt-3 h-3 w-40" />
+                        ) : (
+                            <p className="mt-3 text-xs text-muted-foreground">
+                                {`${pnl.realizedCount} realized trade${pnl.realizedCount === 1 ? "" : "s"} recorded`}
+                            </p>
+                        )}
 
-                        {pnl.history.length > 0 && (
+                        {pnlLoading ? (
+                            <div className="mt-5 border-t border-border pt-4">
+                                <Skeleton className="mb-3 h-4 w-36" />
+                                <ChartSkeleton type="line" />
+                            </div>
+                        ) : pnl.history.length > 0 && (
                             <div className="mt-5 border-t border-border pt-4">
                                 <p className="mb-3 text-sm font-semibold text-foreground">
                                     Realized PnL History
@@ -1113,7 +1144,7 @@ export function InvestmentsPage() {
                                             axisLine={false}
                                             tickLine={false}
                                             tickFormatter={(value) =>
-                                                `$${Number(value) / 1000}k`
+                                                formatCurrencyCompact(value)
                                             }
                                         />
                                         <Tooltip
@@ -1162,6 +1193,9 @@ export function InvestmentsPage() {
                                     </button>
                                 </div>
 
+                                {loading ? (
+                                    <ChartSkeleton type="line" />
+                                ) : (
                                 <ResponsiveContainer width="100%" height={220}>
                                     <LineChart data={portfolioHistory}>
                                         <CartesianGrid
@@ -1186,7 +1220,7 @@ export function InvestmentsPage() {
                                             axisLine={false}
                                             tickLine={false}
                                             tickFormatter={(value) =>
-                                                `$${Number(value) / 1000}k`
+                                                formatCurrencyCompact(value)
                                             }
                                         />
                                         <Tooltip
@@ -1207,6 +1241,7 @@ export function InvestmentsPage() {
                                         />
                                     </LineChart>
                                 </ResponsiveContainer>
+                                )}
                             </div>
 
                             {/* Holdings table */}
@@ -1224,6 +1259,13 @@ export function InvestmentsPage() {
                                 </div>
 
                                 <div className="w-full max-w-full overflow-x-auto overscroll-x-contain">
+                                    {loading ? (
+                                        <SkeletonTable
+                                            rows={6}
+                                            columns={9}
+                                            className="min-w-[1160px]"
+                                        />
+                                    ) : (
                                     <table className="finova-table min-w-[1160px]">
                                         <thead>
                                             <tr>
@@ -1244,19 +1286,7 @@ export function InvestmentsPage() {
                                         </thead>
 
                                         <tbody>
-                                            {loading && (
-                                                <tr>
-                                                    <td
-                                                        colSpan={9}
-                                                        className="py-8 text-center text-sm text-muted-foreground"
-                                                    >
-                                                        Loading investments...
-                                                    </td>
-                                                </tr>
-                                            )}
-
-                                            {!loading &&
-                                                investments.length === 0 && (
+                                            {investments.length === 0 && (
                                                     <tr>
                                                         <td
                                                             colSpan={9}
@@ -1270,8 +1300,7 @@ export function InvestmentsPage() {
                                                     </tr>
                                                 )}
 
-                                            {!loading &&
-                                                investments.map(
+                                            {investments.map(
                                                     (investment) => (
                                                         <tr
                                                             key={investment.id}
@@ -1454,6 +1483,7 @@ export function InvestmentsPage() {
                                                 )}
                                         </tbody>
                                     </table>
+                                    )}
                                 </div>
 
                                 {/* Add row button */}
@@ -1476,7 +1506,9 @@ export function InvestmentsPage() {
                                     subtitle="By asset class"
                                 />
 
-                                {investmentAllocationData.length > 0 ? (
+                                {loading ? (
+                                    <ChartSkeleton type="donut" />
+                                ) : investmentAllocationData.length > 0 ? (
                                     <>
                                         <ResponsiveContainer
                                             width="100%"
@@ -1553,7 +1585,9 @@ export function InvestmentsPage() {
                                 <SectionHeader title="Top Performers" />
 
                                 <div className="space-y-3">
-                                    {topPerformers.length > 0 ? (
+                                    {loading ? (
+                                        <SkeletonList rows={4} showAvatar showTrailing />
+                                    ) : topPerformers.length > 0 ? (
                                         topPerformers.map((investment) => (
                                             <div
                                                 key={investment.id}

@@ -15,22 +15,9 @@ import {
     EditRecordModal,
 } from "@/components/ui/RecordActions";
 import { AddTransactionModal } from "@/components/modals/AddTransactionModal";
+import { SkeletonCard, SkeletonTable } from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
-
-const typeLabels = {
-    income: "Income",
-    expense: "Expense",
-    transfer: "Transfer",
-};
-
-const currencyOptions = [
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-    { value: "GBP", label: "GBP" },
-    { value: "IDR", label: "IDR" },
-    { value: "JPY", label: "JPY" },
-    { value: "SGD", label: "SGD" },
-];
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const toNumber = (value) => {
     const number = Number(value);
@@ -38,14 +25,8 @@ const toNumber = (value) => {
     return Number.isNaN(number) ? 0 : number;
 };
 
-const fmt = (value, currency = "USD") => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-    }).format(toNumber(value));
-};
-
 export function TransactionsPage() {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [transactions, setTransactions] = useState([]);
     const [accounts, setAccounts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -214,9 +195,9 @@ export function TransactionsPage() {
     const accountOptions = useMemo(() => {
         return accounts.map((account) => ({
             value: String(account.id),
-            label: `${account.name} (${fmt(account.balance, account.currency)})`,
+            label: `${account.name} (${fmt(account.balance)})`,
         }));
-    }, [accounts]);
+    }, [accounts, fmt]);
 
     const incomeCategoryOptions = useMemo(() => {
         return categories
@@ -291,7 +272,7 @@ export function TransactionsPage() {
                 label: "Amount",
                 type: "number",
                 required: true,
-                leftDecor: "$",
+                leftDecor: symbol,
                 step: "0.01",
             },
             {
@@ -318,6 +299,7 @@ export function TransactionsPage() {
         accountOptions,
         incomeCategoryOptions,
         expenseCategoryOptions,
+        symbol,
     ]);
 
     const normalizedEditing = editing
@@ -453,44 +435,52 @@ export function TransactionsPage() {
             <div className="space-y-6 animate-in">
                 {/* Summary row */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {[
-                        {
-                            label: "Total Income",
-                            value: totalIncome,
-                            color: "text-primary-500",
-                            bg: "bg-primary-50 dark:bg-primary-900/20",
-                        },
-                        {
-                            label: "Total Expenses",
-                            value: totalExpense,
-                            color: "text-red-500",
-                            bg: "bg-red-50 dark:bg-red-900/20",
-                        },
-                        {
-                            label: "Net Cash Flow",
-                            value: totalIncome - totalExpense,
-                            color:
-                                totalIncome - totalExpense >= 0
-                                    ? "text-primary-500"
-                                    : "text-red-500",
-                            bg: "bg-muted",
-                        },
-                    ].map((summary) => (
-                        <div
-                            key={summary.label}
-                            className={`finova-card text-center ${summary.bg}`}
-                        >
-                            <p className="text-xs text-muted-foreground">
-                                {summary.label}
-                            </p>
-
-                            <p
-                                className={`text-xl font-bold mt-1 ${summary.color}`}
+                    {loading ? (
+                        <>
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                        </>
+                    ) : (
+                        [
+                            {
+                                label: "Total Income",
+                                value: totalIncome,
+                                color: "text-primary-500",
+                                bg: "bg-primary-50 dark:bg-primary-900/20",
+                            },
+                            {
+                                label: "Total Expenses",
+                                value: totalExpense,
+                                color: "text-red-500",
+                                bg: "bg-red-50 dark:bg-red-900/20",
+                            },
+                            {
+                                label: "Net Cash Flow",
+                                value: totalIncome - totalExpense,
+                                color:
+                                    totalIncome - totalExpense >= 0
+                                        ? "text-primary-500"
+                                        : "text-red-500",
+                                bg: "bg-muted",
+                            },
+                        ].map((summary) => (
+                            <div
+                                key={summary.label}
+                                className={`finova-card text-center ${summary.bg}`}
                             >
-                                {fmt(summary.value)}
-                            </p>
-                        </div>
-                    ))}
+                                <p className="text-xs text-muted-foreground">
+                                    {summary.label}
+                                </p>
+
+                                <p
+                                    className={`text-xl font-bold mt-1 ${summary.color}`}
+                                >
+                                    {fmt(summary.value)}
+                                </p>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 {pageError && (
@@ -578,6 +568,9 @@ export function TransactionsPage() {
 
                     {/* Table */}
                     <div className="overflow-x-auto">
+                        {loading ? (
+                            <SkeletonTable rows={8} columns={7} className="min-w-[720px]" />
+                        ) : (
                         <table className="finova-table">
                             <thead>
                                 <tr>
@@ -592,16 +585,7 @@ export function TransactionsPage() {
                             </thead>
 
                             <tbody>
-                                {loading ? (
-                                    <tr>
-                                        <td
-                                            colSpan={7}
-                                            className="text-center text-muted-foreground py-8"
-                                        >
-                                            Loading transactions...
-                                        </td>
-                                    </tr>
-                                ) : paginated.length === 0 ? (
+                                {paginated.length === 0 ? (
                                     <tr>
                                         <td
                                             colSpan={7}
@@ -688,6 +672,7 @@ export function TransactionsPage() {
                                 )}
                             </tbody>
                         </table>
+                        )}
                     </div>
 
                     {/* Pagination */}

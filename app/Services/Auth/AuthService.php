@@ -17,6 +17,8 @@ class AuthService
             'email' => Str::lower($data['email']),
             'password' => $data['password'],
             'currency' => 'USD',
+            'number_format' => 'en-US',
+            'show_decimals' => true,
             'timezone' => 'UTC',
             'theme' => 'system',
         ]);

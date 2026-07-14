@@ -70,14 +70,16 @@ class InvestmentController extends Controller
             })
             ->orderBy('date')
             ->orderBy('id')
-            ->get(['id', 'category_id', 'amount', 'date']);
+            ->get(['id', 'category_id', 'type', 'amount', 'date']);
+
+        $signedAmount = fn (Transaction $transaction): float => $this->signedInvestmentPerformanceAmount($transaction);
 
         $realizedGain = (float) $performanceTransactions
-            ->filter(fn (Transaction $transaction) => (float) $transaction->amount > 0)
-            ->sum(fn (Transaction $transaction) => (float) $transaction->amount);
+            ->filter(fn (Transaction $transaction) => $signedAmount($transaction) > 0)
+            ->sum(fn (Transaction $transaction) => $signedAmount($transaction));
         $realizedLoss = (float) $performanceTransactions
-            ->filter(fn (Transaction $transaction) => (float) $transaction->amount < 0)
-            ->sum(fn (Transaction $transaction) => (float) $transaction->amount);
+            ->filter(fn (Transaction $transaction) => $signedAmount($transaction) < 0)
+            ->sum(fn (Transaction $transaction) => $signedAmount($transaction));
         $realizedPnl = $realizedGain + $realizedLoss;
 
         $unrealizedPnl = (float) Investment::query()
@@ -91,9 +93,9 @@ class InvestmentController extends Controller
 
         $monthlyRealizedPnl = $performanceTransactions
             ->groupBy(fn (Transaction $transaction) => $transaction->date->format('Y-m'))
-            ->map(function ($transactions) {
+            ->map(function ($transactions) use ($signedAmount) {
                 return (float) $transactions->sum(
-                    fn (Transaction $transaction) => (float) $transaction->amount
+                    fn (Transaction $transaction) => $signedAmount($transaction)
                 );
             });
 
@@ -117,10 +119,10 @@ class InvestmentController extends Controller
                 'totalPnl' => $realizedPnl + $unrealizedPnl,
                 'realizedCount' => $performanceTransactions->count(),
                 'winningTrades' => $performanceTransactions
-                    ->filter(fn (Transaction $transaction) => (float) $transaction->amount > 0)
+                    ->filter(fn (Transaction $transaction) => $signedAmount($transaction) > 0)
                     ->count(),
                 'losingTrades' => $performanceTransactions
-                    ->filter(fn (Transaction $transaction) => (float) $transaction->amount < 0)
+                    ->filter(fn (Transaction $transaction) => $signedAmount($transaction) < 0)
                     ->count(),
                 'history' => $history,
             ],
@@ -343,7 +345,7 @@ class InvestmentController extends Controller
                 'account_id' => $account->id,
                 'category_id' => $category->id,
                 'type' => $performanceType,
-                'amount' => $realizedGainLoss,
+                'amount' => abs($realizedGainLoss),
                 'affects_balance' => false,
                 'source_type' => 'investment_performance',
                 'source_id' => $history->id,
@@ -378,6 +380,17 @@ class InvestmentController extends Controller
             'mode' => $result['mode'],
             'data' => $result['data'],
         ]);
+    }
+
+    private function signedInvestmentPerformanceAmount(Transaction $transaction): float
+    {
+        $amount = (float) $transaction->amount;
+
+        if ($transaction->type === 'expense' || $transaction->category?->type === 'expense') {
+            return -abs($amount);
+        }
+
+        return abs($amount);
     }
 
     private function validateInvestment(Request $request, bool $partial = false): array

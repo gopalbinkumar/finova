@@ -7,12 +7,16 @@ import { useMe, useUpdateProfile, useChangePassword, useUploadAvatar, useDeleteA
 import { LoadingButton } from '@/components/common/LoadingButton';
 import { Spinner } from '@/components/common/LoadingButton';
 import { ConfirmDeleteModal } from '@/components/ui/RecordActions';
+import { ProfileSkeleton } from '@/components/ui/Skeleton';
+import { CURRENCIES, NUMBER_FORMATS, formatMoney } from '@/utils/currency';
 // ─── Profile Schema ───────────────────────────────────────────────────────────
 const profileSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     phone: z.string().optional(),
     currency: z.string().optional(),
+    number_format: z.enum(['id-ID', 'en-US']).optional(),
+    show_decimals: z.boolean().optional(),
     timezone: z.string().optional(),
     theme: z.enum(['light', 'dark', 'system']).optional(),
 });
@@ -28,10 +32,10 @@ const passwordSchema = z
     path: ['password_confirmation'],
 });
 // ─── Common currencies ───────────────────────────────────────────────────────
-const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'IDR', 'SGD', 'AUD', 'CAD', 'INR', 'CNY'];
 const timezones = ['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London',
     'Europe/Paris', 'Asia/Tokyo', 'Asia/Singapore', 'Asia/Jakarta',
     'Australia/Sydney', 'Pacific/Auckland'];
+
 // ─── Avatar Section ───────────────────────────────────────────────────────────
 function AvatarSection() {
     const { data: user } = useMe();
@@ -105,16 +109,23 @@ function ProfileForm() {
     const updateProfile = useUpdateProfile();
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(null);
-    const { register, handleSubmit, formState: { errors }, } = useForm({
+    const { register, handleSubmit, watch, formState: { errors }, } = useForm({
         resolver: zodResolver(profileSchema),
         values: {
             name: user?.name ?? '',
             email: user?.email ?? '',
             phone: user?.phone ?? '',
             currency: user?.currency ?? 'USD',
+            number_format: user?.number_format ?? 'en-US',
+            show_decimals: user?.show_decimals ?? true,
             timezone: user?.timezone ?? 'UTC',
             theme: user?.theme ?? 'system',
         },
+    });
+    const currencyPreview = formatMoney(10000, {
+        currency: watch('currency') || 'USD',
+        numberFormat: watch('number_format') || 'en-US',
+        showDecimals: watch('show_decimals') ?? true,
     });
     const onSubmit = async (data) => {
         setError(null);
@@ -173,9 +184,25 @@ function ProfileForm() {
           <div className="relative">
             <Globe size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
             <select id="profile-currency" className="finova-input pl-10 appearance-none cursor-pointer" {...register('currency')}>
-              {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+              {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+        </div>
+
+        {/* Number Format */}
+        <div>
+          <label htmlFor="profile-number-format" className="finova-label">Number format</label>
+          <div className="relative">
+            <Settings size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+            <select id="profile-number-format" className="finova-input pl-10 appearance-none cursor-pointer" {...register('number_format')}>
+              {NUMBER_FORMATS.map((format) => <option key={format.value} value={format.value}>{format.label}</option>)}
+            </select>
+          </div>
+          <label htmlFor="profile-show-decimals" className="mt-3 flex items-center gap-2 text-sm font-medium text-foreground cursor-pointer">
+            <input id="profile-show-decimals" type="checkbox" className="h-4 w-4 rounded border-border text-primary-500 focus:ring-primary-500" {...register('show_decimals')}/>
+            With decimal
+          </label>
+          <p className="text-muted-foreground text-xs mt-1">Preview: {currencyPreview}</p>
         </div>
 
         {/* Timezone */}
@@ -295,9 +322,7 @@ function ChangePasswordForm() {
 export function ProfilePage() {
     const { isLoading } = useMe();
     if (isLoading) {
-        return (<div className="flex items-center justify-center h-64">
-        <Spinner size={32}/>
-      </div>);
+        return <ProfileSkeleton />;
     }
     return (<div className="max-w-3xl mx-auto space-y-6 px-4 py-6">
       {/* Header */}

@@ -17,6 +17,8 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar_url,
             'phone' => $this->phone,
             'currency' => $this->currency,
+            'number_format' => $this->number_format,
+            'show_decimals' => (bool) $this->show_decimals,
             'timezone' => $this->timezone,
             'theme' => $this->theme,
             'created_at' => $this->created_at?->toISOString(),

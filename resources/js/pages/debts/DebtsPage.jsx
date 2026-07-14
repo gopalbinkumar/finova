@@ -11,6 +11,8 @@ import {
 import { SectionHeader, ProgressBar } from "@/components/ui/Cards";
 import { Modal, FormField, Input, ModalFooter } from "@/components/ui/Modal";
 import { AddDebtModal } from "@/components/modals/AddDebtModal";
+import { DebtRecordSkeleton, SkeletonCard } from "@/components/ui/Skeleton";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const INITIAL_FORM = {
     type: "debt",
@@ -20,12 +22,6 @@ const INITIAL_FORM = {
     dueDate: "",
     notes: "",
 };
-
-const fmt = (number) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(Number(number) || 0);
 
 const fmtDate = (value) => {
     if (!value) return "-";
@@ -127,6 +123,7 @@ const normalizeDebt = (item) => {
 };
 
 function EditDebtModal({ open, record, onClose, onSaved }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [form, setForm] = useState(INITIAL_FORM);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -380,7 +377,7 @@ function EditDebtModal({ open, record, onClose, onSaved }) {
                                 set("amount", event.target.value)
                             }
                             error={!!errors.amount}
-                            leftDecor="$"
+                            leftDecor={symbol}
                         />
                     </FormField>
 
@@ -398,7 +395,7 @@ function EditDebtModal({ open, record, onClose, onSaved }) {
                                 set("remaining", event.target.value)
                             }
                             error={!!errors.remaining}
-                            leftDecor="$"
+                            leftDecor={symbol}
                         />
                     </FormField>
                 </div>
@@ -559,6 +556,7 @@ function DeleteDebtModal({ open, record, onClose, onDeleted }) {
 }
 
 export function DebtsPage() {
+    const { formatCurrency: fmt } = useCurrencyFormatter();
     const [records, setRecords] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState("debt");
@@ -739,38 +737,48 @@ export function DebtsPage() {
             <div className="space-y-6 animate-in">
                 {/* Summary */}
                 <div className="grid sm:grid-cols-3 gap-4">
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground">
-                            Total Owed
-                        </p>
-                        <p className="text-2xl font-bold text-red-500 mt-1">
-                            {loading ? "..." : fmt(totalDebt)}
-                        </p>
-                    </div>
+                    {loading ? (
+                        <>
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                        </>
+                    ) : (
+                        <>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    Total Owed
+                                </p>
+                                <p className="text-2xl font-bold text-red-500 mt-1">
+                                    {fmt(totalDebt)}
+                                </p>
+                            </div>
 
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground">
-                            To Receive
-                        </p>
-                        <p className="text-2xl font-bold text-primary-500 mt-1">
-                            {loading ? "..." : fmt(totalReceivable)}
-                        </p>
-                    </div>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    To Receive
+                                </p>
+                                <p className="text-2xl font-bold text-primary-500 mt-1">
+                                    {fmt(totalReceivable)}
+                                </p>
+                            </div>
 
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground">
-                            Net Debt
-                        </p>
-                        <p
-                            className={`text-2xl font-bold mt-1 ${
-                                netDebt > 0
-                                    ? "text-red-500"
-                                    : "text-primary-500"
-                            }`}
-                        >
-                            {loading ? "..." : fmt(netDebt)}
-                        </p>
-                    </div>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    Net Debt
+                                </p>
+                                <p
+                                    className={`text-2xl font-bold mt-1 ${
+                                        netDebt > 0
+                                            ? "text-red-500"
+                                            : "text-primary-500"
+                                    }`}
+                                >
+                                    {fmt(netDebt)}
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {error && (
@@ -814,9 +822,7 @@ export function DebtsPage() {
 
                         <div className="space-y-4">
                             {loading && (
-                                <p className="py-6 text-center text-sm text-muted-foreground">
-                                    Loading debts...
-                                </p>
+                                <DebtRecordSkeleton />
                             )}
 
                             {!loading && debts.length === 0 && (
@@ -1003,9 +1009,7 @@ export function DebtsPage() {
 
                         <div className="space-y-4">
                             {loading && (
-                                <p className="py-6 text-center text-sm text-muted-foreground">
-                                    Loading receivables...
-                                </p>
+                                <DebtRecordSkeleton />
                             )}
 
                             {!loading && receivables.length === 0 && (

@@ -6,6 +6,7 @@ import {
     EditRecordModal,
 } from "@/components/ui/RecordActions";
 import { AddCategoryModal } from "@/components/modals/AddCategoryModal";
+import { CategoryGridSkeleton } from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
 
 const categoryFields = [
@@ -263,7 +264,7 @@ export function CategoriesPage() {
                     <SectionHeader
                         title={
                             loading
-                                ? "Loading categories..."
+                                ? "Preparing categories..."
                                 : `${filtered.length} Categories`
                         }
                         subtitle="Click pencil icon to edit"
@@ -271,9 +272,7 @@ export function CategoriesPage() {
 
                     {/* Loading */}
                     {loading ? (
-                        <div className="py-10 text-center text-sm text-muted-foreground">
-                            Loading categories...
-                        </div>
+                        <CategoryGridSkeleton />
                     ) : (
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {filtered.map((category) => (

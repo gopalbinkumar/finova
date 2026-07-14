@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { Modal, FormField, Input, Select, ModalFooter } from '@/components/ui/Modal';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useCurrencyFormatter } from '@/utils/currency';
 
 const TYPE_OPTIONS = [
     { value: 'stock', label: '📈 Stock' },
@@ -25,6 +27,7 @@ const INITIAL = {
 };
 
 export function AddInvestmentModal({ open, onClose, onSaved }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [form, setForm] = useState(INITIAL);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -213,12 +216,6 @@ export function AddInvestmentModal({ open, onClose, onSaved }) {
     const gain = totalValue - totalCost;
     const gainPct = totalCost > 0 ? (gain / totalCost) * 100 : 0;
 
-    const fmt = (number) =>
-        new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(number || 0);
-
     return (
         <Modal
             open={open}
@@ -251,17 +248,20 @@ export function AddInvestmentModal({ open, onClose, onSaved }) {
                 )}
 
                 <FormField label="Investment Account" required error={errors.accountId}>
-                    <Select
-                        value={form.accountId}
-                        onChange={(event) => set('accountId', event.target.value)}
-                        options={accounts.map((account) => ({
-                            value: String(account.id),
-                            label: `${account.name} (${account.currency} ${Number(account.balance || 0).toLocaleString()})`,
-                        }))}
-                        placeholder={accountsLoading ? 'Loading accounts...' : 'Select investment account'}
-                        disabled={accountsLoading}
-                        error={!!errors.accountId}
-                    />
+                    {accountsLoading ? (
+                        <Skeleton className="h-11 w-full" />
+                    ) : (
+                        <Select
+                            value={form.accountId}
+                            onChange={(event) => set('accountId', event.target.value)}
+                            options={accounts.map((account) => ({
+                                value: String(account.id),
+                                label: `${account.name} (${fmt(account.balance)})`,
+                            }))}
+                            placeholder="Select investment account"
+                            error={!!errors.accountId}
+                        />
+                    )}
                     {!accountsLoading && accounts.length === 0 && (
                         <p className="text-xs text-amber-600">Create an account with type Investment first.</p>
                     )}
@@ -324,7 +324,7 @@ export function AddInvestmentModal({ open, onClose, onSaved }) {
                             value={form.buyPrice}
                             onChange={(event) => set('buyPrice', event.target.value)}
                             error={!!errors.buyPrice}
-                            leftDecor="$"
+                            leftDecor={symbol}
                         />
                     </FormField>
 
@@ -341,7 +341,7 @@ export function AddInvestmentModal({ open, onClose, onSaved }) {
                             value={form.currentPrice}
                             onChange={(event) => set('currentPrice', event.target.value)}
                             error={!!errors.currentPrice}
-                            leftDecor="$"
+                            leftDecor={symbol}
                         />
                     </FormField>
                 </div>

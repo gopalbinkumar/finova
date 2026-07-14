@@ -3,6 +3,7 @@ import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Cards';
 import { ConfirmDeleteModal } from '@/components/ui/RecordActions';
 import { mockNotifications } from '@/data/mockData';
+import { useCurrencyFormatter } from '@/utils/currency';
 const fmtTime = (iso) => {
     const diff = (Date.now() - new Date(iso).getTime()) / 1000;
     if (diff < 60)
@@ -23,6 +24,7 @@ const typeBadge = (type) => {
     return <Badge variant={map[type] ?? 'neutral'}>{type.replace('_', ' ')}</Badge>;
 };
 export function NotificationsPage() {
+    const { formatCurrency } = useCurrencyFormatter();
     const [notifications, setNotifications] = useState(mockNotifications);
     const [filter, setFilter] = useState('all');
     const [deleting, setDeleting] = useState(null);
@@ -30,6 +32,10 @@ export function NotificationsPage() {
     const visible = filter === 'unread' ? notifications.filter(n => !n.read) : notifications;
     const markRead = (id) => setNotifications(ns => ns.map(n => n.id === id ? { ...n, read: true } : n));
     const markAll = () => setNotifications(ns => ns.map(n => ({ ...n, read: true })));
+    const formatBody = (body) =>
+        String(body).replace(/\$([\d,]+(?:\.\d+)?)/g, (_, amount) =>
+            formatCurrency(Number(amount.replace(/,/g, ''))),
+        );
     return (<>
     <ConfirmDeleteModal open={!!deleting} onClose={() => setDeleting(null)} itemName={deleting?.title} itemType="notification" onConfirm={() => setNotifications(items => items.filter(item => item.id !== deleting?.id))}/>
     <div className="space-y-6 animate-in max-w-2xl mx-auto">
@@ -82,7 +88,7 @@ export function NotificationsPage() {
                     </p>
                     {!notif.read && (<span className="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0 mt-1.5"/>)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{notif.body}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{formatBody(notif.body)}</p>
                   <div className="flex items-center justify-between mt-2">
                     {typeBadge(notif.type)}
                     <span className="text-xs text-muted-foreground">{fmtTime(notif.createdAt)}</span>

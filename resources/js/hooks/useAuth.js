@@ -69,8 +69,9 @@ export function useUpdateProfile() {
     return useMutation({
         mutationFn: (data) => authService.updateProfile(data),
         onSuccess: ({ data }) => {
-            setUser(data.data);
-            qc.setQueryData(AUTH_QUERY_KEY, data.data);
+            const user = data.data.user ?? data.data;
+            setUser(user);
+            qc.setQueryData(AUTH_QUERY_KEY, user);
         },
     });
 }
@@ -85,8 +86,9 @@ export function useUploadAvatar() {
     return useMutation({
         mutationFn: (file) => authService.uploadAvatar(file),
         onSuccess: ({ data }) => {
-            setUser(data.data);
-            qc.setQueryData(AUTH_QUERY_KEY, data.data);
+            const user = data.data.user ?? data.data;
+            setUser(user);
+            qc.setQueryData(AUTH_QUERY_KEY, user);
         },
     });
 }
@@ -96,8 +98,9 @@ export function useDeleteAvatar() {
     return useMutation({
         mutationFn: () => authService.deleteAvatar(),
         onSuccess: ({ data }) => {
-            setUser(data.data);
-            qc.setQueryData(AUTH_QUERY_KEY, data.data);
+            const user = data.data.user ?? data.data;
+            setUser(user);
+            qc.setQueryData(AUTH_QUERY_KEY, user);
         },
     });
 }

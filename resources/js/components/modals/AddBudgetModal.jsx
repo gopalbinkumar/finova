@@ -7,7 +7,9 @@ import {
     Select,
     ModalFooter,
 } from "@/components/ui/Modal";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const getCurrentMonth = () => {
     return new Date().toISOString().slice(0, 7);
@@ -52,13 +54,6 @@ const INITIAL = {
     notes: "",
 };
 
-const fmt = (value) => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(Number(value || 0));
-};
-
 const normalizePeriod = (record) => {
     if (record?.period_month) {
         return String(record.period_month).slice(0, 7);
@@ -78,6 +73,7 @@ const normalizePeriod = (record) => {
 };
 
 function BudgetModal({ open, onClose, record, onSave, onCreate }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const isEditing = Boolean(record);
 
     const [form, setForm] = useState(INITIAL);
@@ -305,22 +301,24 @@ function BudgetModal({ open, onClose, record, onSave, onCreate }) {
 
                 {/* Category */}
                 <FormField label="Category" required error={errors.category_id}>
-                    <Select
-                        value={form.category_id}
-                        onChange={(event) =>
-                            setField("category_id", event.target.value)
-                        }
-                        options={expenseCategoryOptions}
-                        placeholder={
-                            loadingCategories
-                                ? "Loading categories..."
-                                : expenseCategoryOptions.length === 0
-                                  ? "No expense categories found"
-                                  : "Select a category..."
-                        }
-                        error={!!errors.category_id}
-                        disabled={loading || loadingCategories}
-                    />
+                    {loadingCategories ? (
+                        <Skeleton className="h-11 w-full" />
+                    ) : (
+                        <Select
+                            value={form.category_id}
+                            onChange={(event) =>
+                                setField("category_id", event.target.value)
+                            }
+                            options={expenseCategoryOptions}
+                            placeholder={
+                                expenseCategoryOptions.length === 0
+                                    ? "No expense categories found"
+                                    : "Select a category..."
+                            }
+                            error={!!errors.category_id}
+                            disabled={loading}
+                        />
+                    )}
                 </FormField>
 
                 {/* Period */}
@@ -347,7 +345,7 @@ function BudgetModal({ open, onClose, record, onSave, onCreate }) {
                             setField("limit", event.target.value)
                         }
                         error={!!errors.limit}
-                        leftDecor="$"
+                        leftDecor={symbol}
                         disabled={loading}
                     />
                 </FormField>
@@ -415,7 +413,7 @@ function BudgetModal({ open, onClose, record, onSave, onCreate }) {
                         </div>
 
                         <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>$0 spent</span>
+                            <span>{fmt(0)} spent</span>
                             <span>
                                 Period:{" "}
                                 {

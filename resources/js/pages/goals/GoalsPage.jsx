@@ -15,14 +15,13 @@ import {
 } from '@/components/ui/RecordActions';
 import { AddGoalModal } from '@/components/modals/AddGoalModal';
 import { GoalAllocationsModal } from '@/components/modals/GoalAllocationsModal';
+import {
+    GoalCardsSkeleton,
+    PageHeaderSkeleton,
+    SkeletonCard,
+} from '@/components/ui/Skeleton';
 import { api } from '@/services/api';
-
-const fmt = (n) =>
-    new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0,
-    }).format(Number(n) || 0);
+import { useCurrencyFormatter } from '@/utils/currency';
 
 const fmtDate = (date) => {
     if (!date) return '-';
@@ -125,6 +124,7 @@ const goalFields = [
 ];
 
 export function GoalsPage() {
+    const { formatCurrency: fmt } = useCurrencyFormatter();
     const [goals, setGoals] = useState([]);
     const [loading, setLoading] = useState(false);
     const [pageError, setPageError] = useState('');
@@ -480,34 +480,47 @@ export function GoalsPage() {
 
             <div className="space-y-6 animate-in">
                 <div className="grid sm:grid-cols-3 gap-4">
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground">
-                            Total Saved
-                        </p>
-                        <p className="text-2xl font-bold text-primary-500 mt-1">
-                            {fmt(totalSaved)}
-                        </p>
-                    </div>
+                    {loading ? (
+                        <>
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                            <SkeletonCard rows={2} showIcon={false} />
+                        </>
+                    ) : (
+                        <>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    Total Saved
+                                </p>
+                                <p className="text-2xl font-bold text-primary-500 mt-1">
+                                    {fmt(totalSaved)}
+                                </p>
+                            </div>
 
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground">
-                            Total Target
-                        </p>
-                        <p className="text-2xl font-bold text-foreground mt-1">
-                            {fmt(totalTarget)}
-                        </p>
-                    </div>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    Total Target
+                                </p>
+                                <p className="text-2xl font-bold text-foreground mt-1">
+                                    {fmt(totalTarget)}
+                                </p>
+                            </div>
 
-                    <div className="finova-card text-center">
-                        <p className="text-xs text-muted-foreground">
-                            Goals Completed
-                        </p>
-                        <p className="text-2xl font-bold text-foreground mt-1">
-                            {completed.length} / {goals.length}
-                        </p>
-                    </div>
+                            <div className="finova-card text-center">
+                                <p className="text-xs text-muted-foreground">
+                                    Goals Completed
+                                </p>
+                                <p className="text-2xl font-bold text-foreground mt-1">
+                                    {completed.length} / {goals.length}
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
 
+                {loading ? (
+                    <PageHeaderSkeleton />
+                ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h2 className="text-lg font-bold text-foreground">
@@ -540,6 +553,7 @@ export function GoalsPage() {
                         </button>
                     </div>
                 </div>
+                )}
 
                 {pageError && (
                     <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
@@ -547,13 +561,7 @@ export function GoalsPage() {
                     </div>
                 )}
 
-                {loading && (
-                    <div className="finova-card text-center py-10">
-                        <p className="text-sm text-muted-foreground">
-                            Loading goals...
-                        </p>
-                    </div>
-                )}
+                {loading && <GoalCardsSkeleton />}
 
                 {!loading && completed.length > 0 && (
                     <div>

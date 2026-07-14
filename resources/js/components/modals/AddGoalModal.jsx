@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Target } from "lucide-react";
 import { FormField, Input, Modal, ModalFooter } from "@/components/ui/Modal";
 import { api } from "@/services/api";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const ICON_OPTIONS = [
     "🎯",
@@ -46,6 +47,7 @@ const INITIAL = {
 };
 
 export function AddGoalModal({ open, onClose, onSave }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [form, setForm] = useState(INITIAL);
     const [errors, setErrors] = useState({});
     const [generalError, setGeneralError] = useState("");
@@ -286,7 +288,7 @@ export function AddGoalModal({ open, onClose, onSave }) {
                                 set("target", event.target.value)
                             }
                             error={!!errors.target}
-                            leftDecor="$"
+                            leftDecor={symbol}
                             disabled={loading}
                         />
                     </FormField>
@@ -348,7 +350,7 @@ export function AddGoalModal({ open, onClose, onSave }) {
                         </div>
 
                         <p className="font-bold text-foreground flex-shrink-0">
-                            ${target.toLocaleString()}
+                            {fmt(target)}
                         </p>
                     </div>
                 )}

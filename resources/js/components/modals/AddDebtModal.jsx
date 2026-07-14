@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CreditCard } from "lucide-react";
 import { Modal, FormField, Input, ModalFooter } from "@/components/ui/Modal";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const INITIAL = {
     type: "debt",
@@ -11,12 +12,6 @@ const INITIAL = {
     notes: "",
 };
 
-const fmt = (number) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(Number(number) || 0);
-
 const getCsrfToken = () => {
     return document
         .querySelector('meta[name="csrf-token"]')
@@ -24,6 +19,7 @@ const getCsrfToken = () => {
 };
 
 export function AddDebtModal({ open, onClose, defaultType = "debt", onSaved }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [form, setForm] = useState({
         ...INITIAL,
         type: defaultType,
@@ -184,7 +180,7 @@ export function AddDebtModal({ open, onClose, defaultType = "debt", onSaved }) {
                 resetForm();
                 onClose?.();
             }, 1000);
-        } catch (error) {
+        } catch {
             setErrors({
                 general: "Network error. Please check your connection.",
             });
@@ -296,7 +292,7 @@ export function AddDebtModal({ open, onClose, defaultType = "debt", onSaved }) {
                                 set("amount", event.target.value)
                             }
                             error={!!errors.amount}
-                            leftDecor="$"
+                            leftDecor={symbol}
                         />
                     </FormField>
 
@@ -315,7 +311,7 @@ export function AddDebtModal({ open, onClose, defaultType = "debt", onSaved }) {
                                 set("remaining", event.target.value)
                             }
                             error={!!errors.remaining}
-                            leftDecor="$"
+                            leftDecor={symbol}
                         />
                     </FormField>
                 </div>

@@ -30,6 +30,8 @@ class User extends Authenticatable
         'avatar',
         'phone',
         'currency',
+        'number_format',
+        'show_decimals',
         'timezone',
         'theme',
     ];
@@ -52,6 +54,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'show_decimals' => 'boolean',
     ];
 
     /**

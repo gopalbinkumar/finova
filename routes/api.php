@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\GoalController;
 use App\Http\Controllers\Api\InvestmentController;
 use App\Http\Controllers\Api\DebtController;
+use App\Http\Controllers\Api\DashboardController;
 
 
 Route::prefix('auth')->group(function () {
@@ -17,11 +18,16 @@ Route::prefix('auth')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::post('/change-password', [AuthController::class, 'changePassword']);
+        Route::post('/avatar', [AuthController::class, 'uploadAvatar']);
+        Route::delete('/avatar', [AuthController::class, 'deleteAvatar']);
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('dashboard', DashboardController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('accounts', AccountController::class);
     Route::apiResource('transactions', TransactionController::class);

@@ -8,7 +8,9 @@ import {
     Textarea,
     ModalFooter,
 } from "@/components/ui/Modal";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const INITIAL = {
     type: "expense",
@@ -27,21 +29,6 @@ const typeColors = {
     transfer: "#6366F1",
 };
 
-const currencySymbols = {
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    IDR: "Rp",
-    JPY: "¥",
-    SGD: "S$",
-};
-
-const fmt = (value, currency = "USD") => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-    }).format(Number(value || 0));
-};
 
 export function AddTransactionModal({
     open,
@@ -49,6 +36,7 @@ export function AddTransactionModal({
     defaultType = "expense",
     onCreate,
 }) {
+    const { formatCurrency: fmt, symbol: currencySymbol } = useCurrencyFormatter();
     const [form, setForm] = useState({
         ...INITIAL,
         type: defaultType,
@@ -75,9 +63,6 @@ export function AddTransactionModal({
     const selectedCategory = categories.find(
         (category) => String(category.id) === String(form.category_id),
     );
-
-    const selectedCurrency = selectedAccount?.currency || "USD";
-    const currencySymbol = currencySymbols[selectedCurrency] || "$";
 
     useEffect(() => {
         if (open) {
@@ -154,18 +139,18 @@ export function AddTransactionModal({
     const accountOptions = useMemo(() => {
         return accounts.map((account) => ({
             value: String(account.id),
-            label: `${account.name} (${fmt(account.balance, account.currency)})`,
+            label: `${account.name} (${fmt(account.balance)})`,
         }));
-    }, [accounts]);
+    }, [accounts, fmt]);
 
     const toAccountOptions = useMemo(() => {
         return accounts
             .filter((account) => String(account.id) !== String(form.account_id))
             .map((account) => ({
                 value: String(account.id),
-                label: `${account.name} (${fmt(account.balance, account.currency)})`,
+                label: `${account.name} (${fmt(account.balance)})`,
             }));
-    }, [accounts, form.account_id]);
+    }, [accounts, form.account_id, fmt]);
 
     const filteredCategories = useMemo(() => {
         if (form.type === "transfer") return [];
@@ -393,20 +378,20 @@ export function AddTransactionModal({
                         required
                         error={errors.account_id}
                     >
-                        <Select
-                            value={form.account_id}
-                            onChange={(event) =>
-                                setField("account_id", event.target.value)
-                            }
-                            options={accountOptions}
-                            placeholder={
-                                loadingOptions
-                                    ? "Loading accounts..."
-                                    : "Select account..."
-                            }
-                            error={!!errors.account_id}
-                            disabled={loading || loadingOptions}
-                        />
+                        {loadingOptions ? (
+                            <Skeleton className="h-11 w-full" />
+                        ) : (
+                            <Select
+                                value={form.account_id}
+                                onChange={(event) =>
+                                    setField("account_id", event.target.value)
+                                }
+                                options={accountOptions}
+                                placeholder="Select account..."
+                                error={!!errors.account_id}
+                                disabled={loading}
+                            />
+                        )}
                     </FormField>
 
                     {form.type === "transfer" && (
@@ -415,27 +400,23 @@ export function AddTransactionModal({
                             required
                             error={errors.to_account_id}
                         >
-                            <Select
-                                value={form.to_account_id}
-                                onChange={(event) =>
-                                    setField(
-                                        "to_account_id",
-                                        event.target.value,
-                                    )
-                                }
-                                options={toAccountOptions}
-                                placeholder={
-                                    loadingOptions
-                                        ? "Loading accounts..."
-                                        : "Select destination..."
-                                }
-                                error={!!errors.to_account_id}
-                                disabled={
-                                    loading ||
-                                    loadingOptions ||
-                                    !form.account_id
-                                }
-                            />
+                            {loadingOptions ? (
+                                <Skeleton className="h-11 w-full" />
+                            ) : (
+                                <Select
+                                    value={form.to_account_id}
+                                    onChange={(event) =>
+                                        setField(
+                                            "to_account_id",
+                                            event.target.value,
+                                        )
+                                    }
+                                    options={toAccountOptions}
+                                    placeholder="Select destination..."
+                                    error={!!errors.to_account_id}
+                                    disabled={loading || !form.account_id}
+                                />
+                            )}
                         </FormField>
                     )}
                 </div>
@@ -447,22 +428,24 @@ export function AddTransactionModal({
                         required
                         error={errors.category_id}
                     >
-                        <Select
-                            value={form.category_id}
-                            onChange={(event) =>
-                                setField("category_id", event.target.value)
-                            }
-                            options={filteredCategories}
-                            placeholder={
-                                loadingOptions
-                                    ? "Loading categories..."
-                                    : filteredCategories.length === 0
-                                      ? `No ${form.type} categories found`
-                                      : "Select category..."
-                            }
-                            error={!!errors.category_id}
-                            disabled={loading || loadingOptions}
-                        />
+                        {loadingOptions ? (
+                            <Skeleton className="h-11 w-full" />
+                        ) : (
+                            <Select
+                                value={form.category_id}
+                                onChange={(event) =>
+                                    setField("category_id", event.target.value)
+                                }
+                                options={filteredCategories}
+                                placeholder={
+                                    filteredCategories.length === 0
+                                        ? `No ${form.type} categories found`
+                                        : "Select category..."
+                                }
+                                error={!!errors.category_id}
+                                disabled={loading}
+                            />
+                        )}
                     </FormField>
                 )}
 
@@ -564,7 +547,7 @@ export function AddTransactionModal({
                                 : form.type === "transfer"
                                   ? "±"
                                   : "-"}
-                            {fmt(form.amount, selectedCurrency)}
+                            {fmt(form.amount)}
                         </p>
                     </div>
                 )}

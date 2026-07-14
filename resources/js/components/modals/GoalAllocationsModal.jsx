@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, PiggyBank, Plus, Trash2 } from "lucide-react";
 import { FormField, Input, Modal, ModalFooter } from "@/components/ui/Modal";
+import { SkeletonList } from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 let allocationRowId = 0;
 
@@ -11,13 +13,6 @@ const emptyAllocation = () => ({
     amount: "",
     notes: "",
 });
-
-const fmt = (n) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-    }).format(Number(n) || 0);
 
 const getAccountIcon = (type) => {
     const icons = {
@@ -80,6 +75,7 @@ const normalizeGoal = (goal) => {
 };
 
 export function GoalAllocationsModal({ open, onClose, record, onSave }) {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
     const [accounts, setAccounts] = useState([]);
     const [accountsLoading, setAccountsLoading] = useState(false);
     const [accountsError, setAccountsError] = useState("");
@@ -163,7 +159,7 @@ export function GoalAllocationsModal({ open, onClose, record, onSave }) {
         setErrors((current) => ({
             ...current,
             [rowId]: {
-                ...(current[rowId] || {}),
+                ...current[rowId],
                 [key]: "",
             },
         }));
@@ -356,8 +352,8 @@ export function GoalAllocationsModal({ open, onClose, record, onSave }) {
                 </div>
 
                 {accountsLoading && (
-                    <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-                        Loading accounts...
+                    <div className="rounded-xl border border-border bg-muted/20 p-4">
+                        <SkeletonList rows={2} showAvatar showTrailing={false} />
                     </div>
                 )}
 
@@ -460,7 +456,7 @@ export function GoalAllocationsModal({ open, onClose, record, onSave }) {
                                             min="0"
                                             step="100"
                                             placeholder="0"
-                                            leftDecor="$"
+                                            leftDecor={symbol}
                                             value={allocation.amount}
                                             disabled={loading}
                                             error={!!rowErrors.amount}

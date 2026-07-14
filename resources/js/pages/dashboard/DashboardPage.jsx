@@ -22,27 +22,54 @@ import {
     Plus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StatCard, ProgressBar, SectionHeader } from "@/components/ui/Cards";
-import {
-    mockTransactions,
-    mockBudgets,
-    summaryStats,
-    monthlyChartData,
-    expenseCategoryData,
-    cashFlowData,
-    upcomingBills,
-} from "@/data/mockData";
 import { AddTransactionModal } from "@/components/modals/AddTransactionModal";
-import { useMe } from "@/hooks/useAuth";
-const fmt = (n) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-    }).format(n);
-const CustomTooltip = ({ active, payload, label }) => {
+import { DashboardSkeleton } from "@/components/ui/Skeleton";
+import { api } from "@/services/api";
+import { useCurrencyFormatter } from "@/utils/currency";
+
+const defaultDashboard = {
+    userName: "User",
+    periodLabel: "",
+    currentMonthShort: "",
+    summaryStats: {
+        netWorth: 0,
+        totalBalance: 0,
+        totalInvestment: 0,
+        monthlyIncome: 0,
+        monthlyExpense: 0,
+        activeGoals: 0,
+        activeDebts: 0,
+    },
+    monthlyStats: {
+        current: { income: 0, expense: 0 },
+        last: { income: 0, expense: 0 },
+        incomeTrend: 0,
+        expenseTrend: 0,
+    },
+    completedGoalsCount: 0,
+    debtDueThisWeek: 0,
+    monthlyChartData: [],
+    expenseCategoryData: [],
+    expenseChartData: [{ name: "No spending", value: 0, color: "#94A3B8" }],
+    cashFlowData: [],
+    recent: [],
+    topBudgets: [],
+    upcomingBills: [],
+};
+
+const getGreeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+};
+
+const CustomTooltip = ({ active, payload, label, formatter }) => {
     if (!active || !payload?.length) return null;
+
     return (
         <div className="finova-card !p-3 !shadow-xl text-xs space-y-1 min-w-[120px]">
             <p className="font-semibold text-foreground mb-2">{label}</p>
@@ -52,30 +79,83 @@ const CustomTooltip = ({ active, payload, label }) => {
                     className="flex items-center justify-between gap-4"
                 >
                     <span style={{ color: p.color }}>{p.name}</span>
-                    <span className="font-semibold">{fmt(p.value)}</span>
+                    <span className="font-semibold">{formatter(p.value)}</span>
                 </div>
             ))}
         </div>
     );
 };
+
 export function DashboardPage() {
-    const { data: user, isLoading } = useMe();
+    const { formatCurrency: fmt, formatCurrencyCompact } = useCurrencyFormatter();
 
-    const recent = mockTransactions.slice(0, 6);
-    const topBudgets = mockBudgets.slice(0, 4);
+    const [dashboard, setDashboard] = useState(defaultDashboard);
     const [showTxModal, setShowTxModal] = useState(false);
+    const [loadingDashboard, setLoadingDashboard] = useState(false);
+    const [pageError, setPageError] = useState("");
 
-    const userName = user?.name || "User";
+    const fetchDashboard = async () => {
+        try {
+            setLoadingDashboard(true);
+            setPageError("");
+
+            const response = await api.get("/dashboard");
+            setDashboard({
+                ...defaultDashboard,
+                ...response.data.data,
+            });
+        } catch (error) {
+            console.error("Failed to fetch dashboard:", error);
+            setPageError(
+                error?.response?.data?.message || "Failed to load dashboard.",
+            );
+        } finally {
+            setLoadingDashboard(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDashboard();
+    }, []);
+
+    const {
+        periodLabel,
+        currentMonthShort,
+        summaryStats,
+        monthlyStats,
+        completedGoalsCount,
+        debtDueThisWeek,
+        monthlyChartData,
+        expenseCategoryData,
+        expenseChartData,
+        cashFlowData,
+        recent,
+        topBudgets,
+        upcomingBills,
+        userName,
+    } = dashboard;
 
     return (
         <>
             <AddTransactionModal
                 open={showTxModal}
                 onClose={() => setShowTxModal(false)}
+                onCreate={() => {
+                    setShowTxModal(false);
+                    fetchDashboard();
+                }}
             />
 
+            {loadingDashboard ? (
+                <DashboardSkeleton />
+            ) : (
             <div className="space-y-6 animate-in">
-                {/* Welcome banner */}
+                {pageError && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:border-red-900/40 dark:bg-red-900/20">
+                        {pageError}
+                    </div>
+                )}
+
                 <div
                     className="relative rounded-2xl overflow-hidden p-6 text-white"
                     style={{
@@ -91,23 +171,23 @@ export function DashboardPage() {
                     </div>
                     <div className="relative">
                         <p className="text-white/70 text-sm mb-1">
-                            Good morning ☀️
+                            {getGreeting()}
                         </p>
                         <h1 className="text-2xl font-bold mb-1">
-                            Welcome back, {isLoading ? "..." : userName}!
+                            Welcome back, {userName}!
                         </h1>
                         <p className="text-white/70 text-sm">
-                            Here's your financial overview for June 2024.
+                            Here's your financial overview for {periodLabel}.
                         </p>
                     </div>
-                    <div className="relative mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="relative mt-6 flex flex-wrap gap-3">
                         <div className="bg-white/10 rounded-xl p-3">
                             <p className="text-white/60 text-xs">Net Worth</p>
                             <p className="text-xl font-bold">
                                 {fmt(summaryStats.netWorth)}
                             </p>
                         </div>
-                        <div className="bg-white/10 rounded-xl p-3">
+                        <div className="bg-white/10 rounded-xl p-3 hidden sm:block">
                             <p className="text-white/60 text-xs">
                                 Total Balance
                             </p>
@@ -124,30 +204,35 @@ export function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Stats grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger">
                     <StatCard
                         title="Monthly Income"
                         value={fmt(summaryStats.monthlyIncome)}
-                        subtitle="vs $5,500 last month"
+                        subtitle={`vs ${fmt(monthlyStats.last.income)} last month`}
                         icon={<TrendingUp size={20} />}
-                        trend={{ value: 20.4, label: "vs last month" }}
+                        trend={{
+                            value: Number(monthlyStats.incomeTrend.toFixed(1)),
+                            label: "vs last month",
+                        }}
                         accentColor="#2563EB"
                         className="animate-in"
                     />
                     <StatCard
                         title="Monthly Expenses"
                         value={fmt(summaryStats.monthlyExpense)}
-                        subtitle="vs $3,950 last month"
+                        subtitle={`vs ${fmt(monthlyStats.last.expense)} last month`}
                         icon={<TrendingDown size={20} />}
-                        trend={{ value: -5.5, label: "vs last month" }}
+                        trend={{
+                            value: Number(monthlyStats.expenseTrend.toFixed(1)),
+                            label: "vs last month",
+                        }}
                         accentColor="#EF4444"
                         className="animate-in"
                     />
                     <StatCard
                         title="Active Goals"
                         value={`${summaryStats.activeGoals}`}
-                        subtitle="1 completed this month"
+                        subtitle={`${completedGoalsCount} completed`}
                         icon={<Target size={20} />}
                         accentColor="#8B5CF6"
                         className="animate-in"
@@ -155,16 +240,14 @@ export function DashboardPage() {
                     <StatCard
                         title="Active Debts"
                         value={`${summaryStats.activeDebts}`}
-                        subtitle="$2,150 due this week"
+                        subtitle={`${fmt(debtDueThisWeek)} due this week`}
                         icon={<CreditCard size={20} />}
                         accentColor="#F59E0B"
                         className="animate-in"
                     />
                 </div>
 
-                {/* Charts row */}
                 <div className="grid lg:grid-cols-3 gap-6">
-                    {/* Income vs Expense Bar Chart */}
                     <div className="lg:col-span-2 finova-card">
                         <SectionHeader
                             title="Income vs Expenses"
@@ -197,9 +280,9 @@ export function DashboardPage() {
                                     }}
                                     axisLine={false}
                                     tickLine={false}
-                                    tickFormatter={(v) => `$${v / 1000}k`}
+                                    tickFormatter={(v) => formatCurrencyCompact(v)}
                                 />
-                                <Tooltip content={<CustomTooltip />} />
+                                <Tooltip content={<CustomTooltip formatter={fmt} />} />
                                 <Legend
                                     iconType="circle"
                                     iconSize={8}
@@ -221,17 +304,16 @@ export function DashboardPage() {
                         </ResponsiveContainer>
                     </div>
 
-                    {/* Expense breakdown donut */}
                     <div className="finova-card">
                         <SectionHeader
                             title="Spending Breakdown"
-                            subtitle="June 2024"
+                            subtitle={periodLabel}
                         />
                         <div className="flex flex-col items-center">
                             <ResponsiveContainer width="100%" height={160}>
                                 <RePieChart>
                                     <Pie
-                                        data={expenseCategoryData}
+                                        data={expenseChartData}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={45}
@@ -239,7 +321,7 @@ export function DashboardPage() {
                                         dataKey="value"
                                         stroke="none"
                                     >
-                                        {expenseCategoryData.map((entry, i) => (
+                                        {expenseChartData.map((entry, i) => (
                                             <Cell key={i} fill={entry.color} />
                                         ))}
                                     </Pie>
@@ -271,9 +353,7 @@ export function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Bottom row */}
                 <div className="grid lg:grid-cols-3 gap-6">
-                    {/* Recent Transactions */}
                     <div className="lg:col-span-2 finova-card">
                         <SectionHeader
                             title="Recent Transactions"
@@ -291,7 +371,7 @@ export function DashboardPage() {
                                         to="/transactions"
                                         className="text-xs text-primary-500 hover:underline font-medium"
                                     >
-                                        View all →
+                                        View all -&gt;
                                     </Link>
                                 </div>
                             }
@@ -304,17 +384,17 @@ export function DashboardPage() {
                                 >
                                     <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center text-base flex-shrink-0">
                                         {tx.type === "income"
-                                            ? "💚"
+                                            ? "+"
                                             : tx.type === "transfer"
-                                              ? "↔️"
-                                              : "💸"}
+                                              ? "<>"
+                                              : "-"}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-foreground truncate">
                                             {tx.description}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            {tx.category} · {tx.date}
+                                            {tx.category} - {tx.date}
                                         </p>
                                     </div>
                                     <span
@@ -323,7 +403,7 @@ export function DashboardPage() {
                                         {tx.type === "income"
                                             ? "+"
                                             : tx.type === "transfer"
-                                              ? "↔"
+                                              ? "<>"
                                               : "-"}
                                         {fmt(tx.amount)}
                                     </span>
@@ -332,9 +412,7 @@ export function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Sidebar column */}
                     <div className="space-y-6">
-                        {/* Budget snapshot */}
                         <div className="finova-card">
                             <SectionHeader
                                 title="Budget Snapshot"
@@ -343,7 +421,7 @@ export function DashboardPage() {
                                         to="/budget"
                                         className="text-xs text-primary-500 hover:underline font-medium"
                                     >
-                                        View all →
+                                        View all -&gt;
                                     </Link>
                                 }
                             />
@@ -363,7 +441,7 @@ export function DashboardPage() {
                                         </div>
                                         <ProgressBar
                                             value={b.spent}
-                                            max={b.limit}
+                                            max={b.limit || 1}
                                             color={b.color}
                                             showLabel={false}
                                             height={6}
@@ -373,7 +451,6 @@ export function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* Upcoming bills */}
                         <div className="finova-card">
                             <SectionHeader
                                 title="Upcoming Bills"
@@ -387,7 +464,7 @@ export function DashboardPage() {
                             <div className="space-y-3">
                                 {upcomingBills.map((bill, i) => (
                                     <div
-                                        key={i}
+                                        key={`${bill.name}-${i}`}
                                         className="flex items-center gap-3"
                                     >
                                         <div
@@ -416,11 +493,10 @@ export function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Cash flow chart */}
                 <div className="finova-card">
                     <SectionHeader
                         title="Cash Flow"
-                        subtitle="Balance trend — June 2024"
+                        subtitle={`Balance trend - ${periodLabel}`}
                     />
                     <ResponsiveContainer width="100%" height={180}>
                         <AreaChart data={cashFlowData}>
@@ -457,7 +533,7 @@ export function DashboardPage() {
                                 }}
                                 axisLine={false}
                                 tickLine={false}
-                                tickFormatter={(v) => `Jun ${v}`}
+                                tickFormatter={(v) => `${currentMonthShort} ${v}`}
                             />
                             <YAxis
                                 tick={{
@@ -466,7 +542,7 @@ export function DashboardPage() {
                                 }}
                                 axisLine={false}
                                 tickLine={false}
-                                tickFormatter={(v) => `$${v / 1000}k`}
+                                tickFormatter={(v) => formatCurrencyCompact(v)}
                             />
                             <Tooltip formatter={(v) => [fmt(v), "Balance"]} />
                             <Area
@@ -481,6 +557,7 @@ export function DashboardPage() {
                     </ResponsiveContainer>
                 </div>
             </div>
+            )}
         </>
     );
 }

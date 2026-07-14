@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { formatMoney } from '@/utils/currency';
 /**
  * Merge Tailwind classes safely, resolving conflicts.
  * Usage: cn('px-4', condition && 'text-red-500', 'text-sm')
@@ -11,11 +12,7 @@ export function cn(...inputs) {
  * Format a number as currency.
  */
 export function formatCurrency(amount, currency = 'USD', locale = 'en-US') {
-    return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 2,
-    }).format(amount);
+    return formatMoney(amount, { currency, numberFormat: locale });
 }
 /**
  * Format a date string to a readable format.

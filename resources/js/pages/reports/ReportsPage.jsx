@@ -3,7 +3,7 @@ import { Download, Calendar } from 'lucide-react';
 import { SectionHeader } from '@/components/ui/Cards';
 import { BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, } from 'recharts';
 import { monthlyChartData, expenseCategoryData, summaryStats } from '@/data/mockData';
-const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+import { useCurrencyFormatter } from '@/utils/currency';
 const months = ['January', 'February', 'March', 'April', 'May', 'June'];
 // Savings rate data
 const savingsData = monthlyChartData.map(m => ({
@@ -21,6 +21,7 @@ const projectionData = [
     { month: 'Dec', projected: 15000 },
 ];
 export function ReportsPage() {
+    const { formatCurrency: fmt, formatCurrencyCompact } = useCurrencyFormatter();
     const [period, setPeriod] = useState('June 2024');
     const netSavings = summaryStats.monthlyIncome - summaryStats.monthlyExpense;
     const savingsRate = Math.round((netSavings / summaryStats.monthlyIncome) * 100);
@@ -78,7 +79,7 @@ export function ReportsPage() {
             <BarChart data={monthlyChartData} barSize={18} barGap={4}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v / 1000}k`}/>
+              <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => formatCurrencyCompact(v)}/>
               <Tooltip formatter={(v) => fmt(v)}/>
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }}/>
               <Bar dataKey="income" name="Income" fill="#2563EB" radius={[4, 4, 0, 0]}/>
@@ -100,7 +101,7 @@ export function ReportsPage() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v / 1000}k`}/>
+              <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => formatCurrencyCompact(v)}/>
               <Tooltip formatter={(v) => [fmt(v), 'Savings']}/>
               <Area type="monotone" dataKey="savings" stroke="#2563EB" strokeWidth={2.5} fill="url(#savingsGrad)"/>
             </AreaChart>
@@ -145,7 +146,7 @@ export function ReportsPage() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `$${v / 1000}k`}/>
+              <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => formatCurrencyCompact(v)}/>
               <Tooltip formatter={(v) => [fmt(v), 'Projected Balance']}/>
               <Area type="monotone" dataKey="projected" stroke="#8B5CF6" strokeWidth={2.5} fill="url(#projGrad)" strokeDasharray="6 3"/>
             </AreaChart>

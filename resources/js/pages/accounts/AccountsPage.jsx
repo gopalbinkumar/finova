@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Plus,
     Eye,
@@ -16,7 +16,9 @@ import {
     EditRecordModal,
 } from "@/components/ui/RecordActions";
 import { AddAccountModal } from "@/components/modals/AddAccountModal";
+import { AccountGridSkeleton, SkeletonCard } from "@/components/ui/Skeleton";
 import { api } from "@/services/api";
+import { useCurrencyFormatter } from "@/utils/currency";
 
 const accountTypeLabels = {
     bank: "Bank",
@@ -43,7 +45,7 @@ const currencyOptions = [
     { value: "SGD", label: "SGD" },
 ];
 
-const accountFields = [
+const getAccountFields = (currencySymbol) => [
     {
         key: "name",
         label: "Account Name",
@@ -63,7 +65,7 @@ const accountFields = [
         key: "balance",
         label: "Current Balance",
         type: "number",
-        leftDecor: "$",
+        leftDecor: currencySymbol,
         step: "0.01",
     },
     {
@@ -92,14 +94,9 @@ const toNumber = (value) => {
     return Number.isNaN(number) ? 0 : number;
 };
 
-const fmt = (value, currency = "USD") => {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency,
-    }).format(toNumber(value));
-};
-
 export function AccountsPage() {
+    const { formatCurrency: fmt, symbol } = useCurrencyFormatter();
+    const accountFields = useMemo(() => getAccountFields(symbol), [symbol]);
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [pageError, setPageError] = useState("");
@@ -268,29 +265,39 @@ export function AccountsPage() {
             <div className="space-y-6 animate-in">
                 {/* Summary cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 stagger">
-                    <StatCard
-                        title="Net Balance"
-                        value={hideBalance ? "••••••" : fmt(totalBalance)}
-                        icon={<Wallet size={20} />}
-                        accentColor="#2563EB"
-                        className="animate-in"
-                    />
+                    {loading ? (
+                        <>
+                            <SkeletonCard />
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </>
+                    ) : (
+                        <>
+                            <StatCard
+                                title="Net Balance"
+                                value={hideBalance ? "------" : fmt(totalBalance)}
+                                icon={<Wallet size={20} />}
+                                accentColor="#2563EB"
+                                className="animate-in"
+                            />
 
-                    <StatCard
-                        title="Total Assets"
-                        value={hideBalance ? "••••••" : fmt(totalAssets)}
-                        icon={<TrendingUp size={20} />}
-                        accentColor="#3B82F6"
-                        className="animate-in"
-                    />
+                            <StatCard
+                                title="Total Assets"
+                                value={hideBalance ? "------" : fmt(totalAssets)}
+                                icon={<TrendingUp size={20} />}
+                                accentColor="#3B82F6"
+                                className="animate-in"
+                            />
 
-                    <StatCard
-                        title="Total Liabilities"
-                        value={hideBalance ? "••••••" : fmt(totalLiabilities)}
-                        icon={<CreditCard size={20} />}
-                        accentColor="#EF4444"
-                        className="animate-in"
-                    />
+                            <StatCard
+                                title="Total Liabilities"
+                                value={hideBalance ? "------" : fmt(totalLiabilities)}
+                                icon={<CreditCard size={20} />}
+                                accentColor="#EF4444"
+                                className="animate-in"
+                            />
+                        </>
+                    )}
                 </div>
 
                 {/* Error */}
@@ -307,7 +314,7 @@ export function AccountsPage() {
                             title="My Accounts"
                             subtitle={
                                 loading
-                                    ? "Loading accounts..."
+                                    ? "Preparing accounts..."
                                     : `${accounts.length} accounts connected`
                             }
                         />
@@ -364,15 +371,11 @@ export function AccountsPage() {
 
                     {/* Loading */}
                     {loading ? (
-                        <div className="py-10 text-center text-sm text-muted-foreground">
-                            Loading accounts...
-                        </div>
+                        <AccountGridSkeleton />
                     ) : (
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {filtered.map((account) => {
                                 const balance = toNumber(account.balance);
-                                const currency = account.currency || "USD";
-
                                 return (
                                     <div
                                         key={account.id}
@@ -441,7 +444,7 @@ export function AccountsPage() {
                                             >
                                                 {hideBalance
                                                     ? "••••••"
-                                                    : fmt(balance, currency)}
+                                                    : fmt(balance)}
                                             </p>
                                         </div>
 
